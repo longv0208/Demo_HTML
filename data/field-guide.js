@@ -123,7 +123,7 @@ window.SFE_FIELD_GUIDE = {
         http: "GET ?action=new&po=12   (đổi PO)\nPOST body purchaseOrderId=12  (lúc lưu)",
         servlet:
           'r.setPurchaseOrderId(parseIdOrNull(req.getParameter("purchaseOrderId")));\n// validate: DA_DAT_HANG || DA_NHAN_MOT_PHAN',
-        dao: "Chưa INSERT — đợi createDraft ở bước 4",
+        dao: "Chưa INSERT — đợi createDraft khi Lưu nháp",
         db: "Cột purchase_order_id lúc Lưu nháp"
       },
       file: "GoodsReceiptServlet.java :361, 436–448"
@@ -320,18 +320,19 @@ window.SFE_FIELD_GUIDE = {
       name: "binId",
       label: "Ngăn (Bin)",
       business:
-        "Nơi cất hàng chấp nhận. JS bắt required khi CHAP_NHAN. Lưu nháp (strict=false) chưa bắt Bin như lúc confirm.",
+        "Nơi cất hàng khi dòng là CHAP_NHAN. validateReceipt bắt Bin trên dòng Chấp nhận cả khi Lưu nháp (strict=false). CHO_KIEM_TRA / TU_CHOI được để trống Bin lúc nháp. DAO lúc Xác nhận mới kiểm Bin HOAT_DONG.",
       param: "binId (lặp)",
-      client: "required nếu inspection=CHAP_NHAN (JS)",
+      client: "JS JSP: bin.required = (inspection === CHAP_NHAN)",
       server:
-        "Nháp: không chặn thiếu Bin. Confirm (strict): CHAP_NHAN phải có bin hoạt động.",
+        "CHAP_NHAN && binId empty → binMissing, kể cả nháp. Không phụ thuộc cờ strict.",
       stopsAt: "servlet",
-      dbOnSave: "goods_receipt_items.bin_id (nullable lúc nháp)",
+      dbOnSave: "goods_receipt_items.bin_id (NULL nếu dòng chưa chấp nhận)",
       code: {
         ui: '<select name="binId" class="gr-bin">',
         http: "binId=111",
-        servlet: "item.setBinId nếu > 0; strict confirm mới binMissing",
-        dao: "psItem.setLong(4, bin) hoặc NULL",
+        servlet:
+          'if ("CHAP_NHAN".equals(inspection) && (binId == null || binId <= 0)) binMissing = true;',
+        dao: "psItem.setLong(4, bin) hoặc NULL — nháp không kiểm HOAT_DONG",
         db: "bin_id"
       },
       file: "GoodsReceiptServlet.java :412–415, 529–533"
@@ -395,5 +396,41 @@ window.SFE_FIELD_GUIDE = {
       },
       file: "GoodsReceiptServlet.java :192–212 · DAO :249–319"
     }
-  }
+  },
+
+  howTo: {
+    purchaseOrderId: "Chọn PO còn DA_DAT_HANG hoặc DA_NHAN_MOT_PHAN. Đổi PO reload GET.",
+    supplierName: "Không nhập. Hệ thống điền từ PO.",
+    receiptDate: "Ngày hàng thực nhận, không ở tương lai.",
+    invoiceNumber: "Tùy chọn — số HĐ nhà cung cấp, tối đa 100 ký tự.",
+    note: "Tùy chọn, tối đa 500 ký tự.",
+    poItemId: "Chọn sản phẩm thuộc PO. Cùng SP nhiều lô → nhiều dòng.",
+    batchNumber: "Số lô trên bao bì — bắt buộc mọi dòng.",
+    expiryDate: "Hạn dùng. Nếu chấp nhận, hạn phải sau ngày nhận.",
+    quantity: "Số lượng trên dòng kiểm tra, nguyên dương.",
+    costPrice: "Giá/đơn vị ≥ 0. Form gợi ý unitCost của PO.",
+    zoneRack: "Chọn Khu rồi Kệ để nạp Bin (fetch LocationServlet). Không POST.",
+    binId: "Bắt buộc nếu dòng là Chấp nhận — kể cả lúc lưu nháp.",
+    inspectionResult: "Nháp cho phép Chờ kiểm tra. Chỉ Chấp nhận sẽ cộng kho lúc xác nhận (ngoài phạm vi bài này).",
+    rejectionReason: "Bắt buộc khi Từ chối.",
+    saveDraft: "POST create. Thành công → danh sách + «chưa có gì vào kho.»"
+  },
+  required: {
+    purchaseOrderId: true,
+    supplierName: false,
+    receiptDate: true,
+    invoiceNumber: false,
+    note: false,
+    poItemId: true,
+    batchNumber: true,
+    expiryDate: true,
+    quantity: true,
+    costPrice: true,
+    zoneRack: false,
+    binId: "Khi inspection = CHAP_NHAN",
+    inspectionResult: true,
+    rejectionReason: "Khi inspection = TU_CHOI",
+    saveDraft: true
+  },
+  inventoryOnDraft: false
 };

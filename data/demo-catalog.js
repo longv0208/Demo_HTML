@@ -82,5 +82,26 @@ window.SFE_DEMO = {
         }
       ]
     }
+  },
+
+  closedOrders: {
+    "88": {
+      id: "88",
+      supplierName: "NCC đã giao xong",
+      supplierId: 9,
+      orderDate: "2026-10-01",
+      status: "DA_HOAN_THANH",
+      items: [
+        {
+          poItemId: "301",
+          productId: "80",
+          name: "Ibuprofen 400mg (IBU400)",
+          ordered: 10,
+          received: 10,
+          remaining: 0,
+          cost: "12000"
+        }
+      ]
+    }
   }
 };

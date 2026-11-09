@@ -95,7 +95,7 @@ window.SFE_ACTIONS = {
         rules: [
           "Một dòng = một kết quả kiểm tra (không gán vừa chấp nhận vừa từ chối trên cùng dòng)",
           "Muốn 30 đạt + 10 từ chối → tách 2 dòng",
-          "Zone/Rack/Bin chỉ bắt buộc khi dòng là CHAP_NHAN (lúc xác nhận)"
+          "Bin bắt buộc trên dòng CHAP_NHAN cả khi Lưu nháp (validateReceipt, không cần strict). Zone/Rack không POST."
         ]
       },
       traceReady: false

@@ -11,7 +11,7 @@
   <header class="sfe-topbar">
     <div class="sfe-logo">Servlet Flow <span>Explorer</span></div>
     <div class="sfe-crumb">
-      <a class="sfe-crumb-link" href="index.html">Learning Lab</a>
+      <a class="sfe-crumb-link" href="index.html">Trang chủ</a>
       › <strong>Nhập kho · Lưu nháp</strong>
     </div>
     <div class="sfe-topbar-right">
@@ -19,16 +19,29 @@
     </div>
   </header>
 
+  <div class="wiz-toolbar">
+    <a class="sfe-btn" href="index.html">Trang chủ</a>
+    <button type="button" class="sfe-btn is-on" id="modeGuided">Hướng dẫn</button>
+    <button type="button" class="sfe-btn" id="modeExplorer">Explorer</button>
+    <button type="button" class="sfe-btn" id="resetLesson">Đặt lại bài học</button>
+    <label class="wiz-scenario-label">Thử lỗi
+      <select id="wizScenario">
+        <option value="">— Form đang nhập —</option>
+      </select>
+    </label>
+  </div>
+
   <div class="wiz-shell">
-    <nav class="wiz-stepper" id="wizStepper" aria-label="Nhóm field trên form JSP"></nav>
+    <nav class="wiz-stepper" id="wizStepper" aria-label="Nhóm field"></nav>
+    <nav class="wiz-progress" id="wizProgress" aria-label="15 field"></nav>
 
     <div class="wiz-head">
       <div>
         <p class="wiz-kicker" id="wizStepLabel">Field 1 / 15</p>
         <h1 id="wizTitle">Đơn đặt hàng</h1>
-        <p class="wiz-sub" id="wizSub">Form JSP đầy đủ — highlight từng ô, panel phải giải thích field + layer.</p>
+        <p class="wiz-sub" id="wizSub">Form JSP đầy đủ — một field mỗi lần, layer theo hành động thật.</p>
       </div>
-      <div class="wiz-nav">
+      <div class="wiz-nav wiz-nav-sticky">
         <button type="button" class="sfe-btn" id="wizBack">Field trước</button>
         <button type="button" class="sfe-btn primary" id="wizNext">Field tiếp theo</button>
       </div>
@@ -39,21 +52,39 @@
         <div id="wizFormPane" class="wiz-form-host"></div>
       </section>
 
-      <aside class="wiz-side">
+      <aside class="wiz-side" id="guidedSide">
         <div class="wiz-panel" id="wizFieldCard"></div>
         <div class="wiz-panel">
-          <p class="wiz-card-kicker">Dữ liệu đi qua các layer</p>
+          <p class="wiz-card-kicker">Luồng dữ liệu theo hành động vừa rồi</p>
           <div class="wiz-layers" id="wizLayers"></div>
           <p class="wiz-muted" id="wizLayerNote"></p>
           <div id="wizLayerDetail" class="wiz-layer-detail"></div>
         </div>
       </aside>
+
+      <aside class="wiz-side is-hidden" id="explorerSide"></aside>
+    </div>
+  </div>
+
+  <div id="sfeModal" class="sfe-modal is-hidden" role="dialog" aria-modal="true">
+    <div class="sfe-modal-card">
+      <p id="sfeModalText"></p>
+      <div class="wiz-nav">
+        <button type="button" class="sfe-btn" id="sfeModalCancel">Ở lại</button>
+        <button type="button" class="sfe-btn primary" id="sfeModalOk">Đồng ý</button>
+      </div>
     </div>
   </div>
 
   <script src="data/demo-catalog.js"></script>
   <script src="data/field-guide.js"></script>
   <script src="data/save-draft-trace.js"></script>
+  <script src="data/nhap-kho-form-actions.js"></script>
+  <script src="data/nhap-kho-nghiep-vu.js"></script>
+  <script src="js/lesson-state.js"></script>
+  <script src="js/validate-receipt.js"></script>
+  <script src="js/data-flow.js"></script>
+  <script src="js/explorer-panel.js"></script>
   <script src="js/wizard.js"></script>
 </body>
 </html>
