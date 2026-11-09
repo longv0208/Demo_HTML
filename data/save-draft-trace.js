@@ -79,9 +79,9 @@ window.SFE_TRACE_SAVE_DRAFT = {
         '<button type="submit" name="submitAction" value="draft"\n' +
         '        class="btn btn-secondary">Lưu nháp</button>',
       explain:
-        "Người dùng nhấn nút submit trong form #grForm. Đây là thao tác trên giao diện — chưa có HTTP cho đến khi browser serialize form.",
-      io: { in: "Click chuột / Enter trên form", out: "Sự kiện submit" },
-      nextWhy: "Trình duyệt thu thập các control có name và tạo HTTP request."
+        "Bạn bấm nút Lưu nháp trên form. Đây mới chỉ là thao tác trên màn hình. Trình duyệt chưa gửi gì tới máy chủ cho đến khi nó gom các ô có tên rồi tạo yêu cầu HTTP.",
+      io: { in: "Click chuột / Enter trên form", out: "Sự kiện gửi form" },
+      nextWhy: "Bước tiếp theo: trình duyệt gom mọi ô có tên và tạo yêu cầu gửi lên máy chủ."
     },
     {
       id: "http-post",
@@ -94,10 +94,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         '<form method="post" id="grForm"\n' +
         '      action="${ctx}/inventory/receipts?action=create">',
       explain:
-        "POST vì tạo bản ghi mới. action=create nằm trên query string. Body là application/x-www-form-urlencoded: purchaseOrderId, receiptDate, poItemId, batchNumber, … (cùng tên lặp lại cho nhiều dòng — KHÔNG có [] trong HTML).",
+        "Phương thức POST được dùng vì bạn đang tạo phiếu mới. Tham số action=create nằm trên đường dẫn. Nội dung gửi đi gồm các ô: đơn đặt hàng, ngày nhận, mã dòng đơn, số lô, và các ô khác. Nhiều dòng hàng dùng cùng một tên ô, lặp lại — trong HTML không có dấu ngoặc vuông.",
       dynamicHttp: true,
       io: { in: "Giá trị form hiện tại", out: "HTTP POST + Cookie JSESSIONID" },
-      nextWhy: "Tomcat khớp URL pattern với @WebServlet."
+      nextWhy: "Máy chủ Tomcat nhìn địa chỉ /inventory/receipts rồi đưa yêu cầu cho đúng chương trình Servlet đã gắn nhãn @WebServlet."
     },
     {
       id: "mapping",
@@ -111,10 +111,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         '            urlPatterns = {"/inventory/receipts"})\n' +
         "public class GoodsReceiptServlet extends HttpServlet {",
       explain:
-        "Mọi request tới /inventory/receipts (sau context path) vào GoodsReceiptServlet — không đi qua MainController.",
+        "Mọi yêu cầu tới địa chỉ /inventory/receipts (sau tên ứng dụng) đều vào chương trình GoodsReceiptServlet. Không đi qua MainController.",
       vars: { urlPattern: "/inventory/receipts", contextPath: "/Pharma_Flow [DEMO]" },
       io: { in: "POST /Pharma_Flow/inventory/receipts?action=create", out: "Instance servlet" },
-      nextWhy: "Method HTTP = POST → container gọi doPost()."
+      nextWhy: "Vì phương thức là POST, máy chủ gọi hàm doPost của GoodsReceiptServlet."
     },
     {
       id: "dopost",
@@ -133,9 +133,9 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "    ...\n" +
         "}",
       explain:
-        "POST không vào doGet(). Đầu tiên luôn kiểm tra quyền người nhận hàng.",
+        "Yêu cầu POST không đi vào hàm doGet. Việc đầu tiên luôn là kiểm tra người dùng đã đăng nhập và có quyền nhận hàng hay chưa.",
       io: { in: "HttpServletRequest / Response", out: "Gọi requireReceiver" },
-      nextWhy: "Chưa biết user hợp lệ thì không xử lý action."
+      nextWhy: "Chưa biết người dùng hợp lệ thì chưa được xử lý thao tác lưu phiếu."
     },
     {
       id: "auth",
@@ -154,7 +154,7 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "}\n" +
         "resp.sendRedirect(... + \"/authen?action=login\");",
       explain:
-        "Chỉ Owner/Admin hoặc Nhân viên được nhập kho. Session attribute: currentUser. [DEMO] giả sử đã đăng nhập NHAN_VIEN.",
+        "Chỉ chủ quán / quản trị hoặc nhân viên mới được nhập kho. Thông tin người dùng nằm trong phiên đăng nhập, thuộc tính currentUser. Bài học này giả sử bạn đã đăng nhập với vai trò nhân viên.",
       vars: {
         "session.currentUser": "User#[DEMO]",
         roleName: "NHAN_VIEN",
@@ -165,7 +165,7 @@ window.SFE_TRACE_SAVE_DRAFT = {
         request: { action: "create" }
       },
       io: { in: "Cookie JSESSIONID → session", out: "User hợp lệ" },
-      nextWhy: "Có user → đọc parameter action."
+      nextWhy: "Đã có người dùng hợp lệ, nên chương trình đọc tham số action để biết bạn muốn làm gì."
     },
     {
       id: "action-switch",
@@ -183,10 +183,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "    ...\n" +
         "}",
       explain:
-        'Query param action=create chọn nhánh handleCreate. (update/confirm/cancel là nhánh khác — không chạy ở đây.)',
+        "Tham số action=create trên đường dẫn chọn nhánh tạo phiếu mới, hàm handleCreate. Các nhánh cập nhật, xác nhận, hủy phiếu là chuyện khác — không chạy ở đây.",
       vars: { action: "create", branch: 'case "create"' },
       io: { in: 'getParameter("action")', out: "handleCreate(...)" },
-      nextWhy: "Vào logic lưu phiếu mới."
+      nextWhy: "Bước tiếp theo là logic lưu phiếu mới."
     },
     {
       id: "handle-create",
@@ -203,9 +203,9 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "    ...\n" +
         "}",
       explain:
-        "Đọc header + dòng hàng, rồi validate với strict=false (cho phép CHO_KIEM_TRA khi lưu nháp).",
+        "Hàm handleCreate đọc phần đầu phiếu và từng dòng hàng, rồi gọi validateReceipt ở chế độ lưu nháp (strict = false). Chế độ này vẫn cho phép dòng Chờ kiểm tra.",
       io: { in: "request + user", out: "Gọi readReceiptForm / readItemsForm" },
-      nextWhy: "Cần object domain trước khi validate."
+      nextWhy: "Cần đọc xong dữ liệu form thành đối tượng phiếu trước khi kiểm tra."
     },
     {
       id: "read-receipt",
@@ -219,10 +219,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "r.setReceiptDate(parseDate(req.getParameter(\"receiptDate\")));\n" +
         "r.setInvoiceNumber(trim(req.getParameter(\"invoiceNumber\")));\n" +
         "r.setNote(trim(req.getParameter(\"note\")));",
-      explain: "Chỉ đọc parameter header. Supplier sẽ suy từ PO lúc validate.",
+      explain: "Hàm này chỉ đọc phần đầu phiếu: đơn đặt hàng, ngày nhận, số hóa đơn, ghi chú. Nhà cung cấp sẽ được lấy từ đơn đặt hàng lúc kiểm tra, không đọc từ form.",
       dynamicVars: "receipt",
       io: { in: "request parameters", out: "GoodsReceipt (chưa status)" },
-      nextWhy: "Tiếp tục đọc các dòng song song."
+      nextWhy: "Tiếp tục đọc các dòng hàng. Nhiều dòng dùng cùng tên ô, máy chủ đọc thành mảng."
     },
     {
       id: "read-items",
@@ -240,10 +240,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "    ...\n" +
         "}",
       explain:
-        "HTML dùng cùng name lặp lại (poItemId, quantity…) — Servlet lấy mảng song song. Không có tên poItemId[] trong markup.",
+        "Trên HTML, nhiều dòng hàng dùng cùng tên ô (poItemId, quantity, …). Chương trình Servlet lấy chúng thành các mảng song song. Trong mã HTML không có tên poItemId[] với dấu ngoặc vuông.",
       dynamicVars: "items",
       io: { in: "parameter arrays", out: "List<GoodsReceiptItem>" },
-      nextWhy: "Validation authoritative ở server."
+      nextWhy: "Bước kiểm tra trên máy chủ mới là kết luận cuối. Kiểm tra trên trình duyệt chỉ là hỗ trợ."
     },
     {
       id: "validate",
@@ -259,10 +259,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "    return;\n" +
         "}",
       explain:
-        "strict=false: vẫn cho CHO_KIEM_TRA. Kiểm tra PO mở nhận, ngày, dòng, lô, SL, giá, over-delivery… Đây là validation SERVER — khác HTML required/JS.",
+        "Chế độ lưu nháp (strict = false) vẫn cho phép Chờ kiểm tra. Máy chủ kiểm tra đơn đặt hàng còn mở, ngày nhận, từng dòng hàng, số lô, số lượng, giá, và không cho nhận quá số còn lại trên đơn. Đây là kiểm tra trên máy chủ — khác với thuộc tính bắt buộc trên HTML hay JavaScript trên trang.",
       branchPoint: true,
       io: { in: "receipt + items + strict=false", out: "errors map (rỗng = OK)" },
-      nextWhy: "errors rỗng → gán BAN_NHAP và gọi DAO; có lỗi → forward form."
+      nextWhy: "Nếu không còn lỗi: gán trạng thái bản nháp rồi gọi chương trình ghi dữ liệu. Nếu còn lỗi: trả lại form để bạn sửa."
     },
     {
       id: "create-draft",
@@ -276,10 +276,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "receipt.setReceivedBy(user.getUserId());\n" +
         "long receiptId = new GoodsReceiptDAO().createDraft(receipt, items);",
       explain:
-        "Chỉ chạy khi validation OK. status=BAN_NHAP — chưa phải xác nhận nhập kho.",
+        "Hàm ghi phiếu createDraft chỉ chạy khi kiểm tra đã đạt. Trạng thái phiếu được gán là bản nháp (BAN_NHAP). Đây chưa phải bước Xác nhận nhập kho.",
       skipOn: ["validation"],
       io: { in: "GoodsReceipt + items", out: "receiptId > 0 hoặc ≤0" },
-      nextWhy: "DAO mở JDBC transaction và INSERT."
+      nextWhy: "Chương trình ghi dữ liệu mở một lần lưu (transaction) rồi thêm dòng vào bảng."
     },
     {
       id: "jdbc",
@@ -299,11 +299,11 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "   inspection_result, rejection_reason)\n" +
         "VALUES (?,?,?,NULL,?,?,?,?,?,?,?);",
       explain:
-        "batch_id = NULL lúc nháp. Không UPDATE inventory_* / purchase_order_items.received_quantity.",
+        "Lúc lưu nháp, cột lô tồn kho (batch_id) để trống. Không sửa bảng tồn kho. Không tăng số lượng đã nhận trên đơn đặt hàng.",
       skipOn: ["validation"],
       dbPreview: true,
       io: { in: "PreparedStatement binds", out: "Rows staged (chưa commit)" },
-      nextWhy: "executeUpdate xong → commit hoặc rollback."
+      nextWhy: "Sau khi chạy câu lệnh thêm dòng: hoặc xác nhận lưu vĩnh viễn, hoặc hủy hết nếu lỗi."
     },
     {
       id: "commit",
@@ -317,12 +317,12 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "return receiptId;\n" +
         "// catch SQLException → rollback → return -1",
       explain:
-        "Thành công: GR + items tồn tại với BAN_NHAP. inventory_batches / locations / movements / PO received KHÔNG đổi. Lỗi SQL → rollback, receiptId=-1.",
+        "Nếu thành công: phiếu và dòng hàng đã có trong cơ sở dữ liệu, trạng thái bản nháp. Số thuốc trên kệ, vị trí lô, sổ xuất-nhập kho, số lượng đã nhận trên đơn đặt hàng đều không đổi. Nếu câu lệnh lỗi: hủy thay đổi, mã phiếu trả về -1.",
       skipOn: ["validation"],
       branchPointDb: true,
       dbAfter: true,
       io: { in: "TX open", out: "COMMIT hoặc ROLLBACK" },
-      nextWhy: "Controller nhận receiptId."
+      nextWhy: "GoodsReceiptServlet nhận mã phiếu để quyết định chuyển trang hay trả lỗi."
     },
     {
       id: "redirect",
@@ -338,11 +338,11 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "}\n" +
         "resp.sendRedirect(req.getContextPath() + LIST_URL + \"?ok=created\");",
       explain:
-        "PRG: Post/Redirect/Get. sendRedirect ≠ forward — browser tạo request GET mới; request attribute của POST bị mất.",
+        "Máy chủ bảo trình duyệt mở trang khác (chuyển trang), không trả lại cùng yêu cầu POST. Trình duyệt sẽ gửi một yêu cầu GET mới. Dữ liệu tạm của lần POST không còn.",
       skipOn: ["validation"],
       onlySuccessOrDb: true,
       io: { in: "receiptId", out: "HTTP 302 Location: .../receipts?ok=created" },
-      nextWhy: "Browser theo Location."
+      nextWhy: "Trình duyệt làm theo địa chỉ máy chủ vừa gửi và xin trang danh sách."
     },
     {
       id: "get-list",
@@ -352,10 +352,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
       method: "GET",
       lines: "—",
       code: "GET /Pharma_Flow/inventory/receipts?ok=created HTTP/1.1",
-      explain: "Request mới, không còn body POST. ok=created là flash qua query.",
+      explain: "Đây là yêu cầu mới, không còn nội dung form POST. Tham số ok=created trên đường dẫn dùng để hiện thông báo thành công.",
       skipOn: ["validation", "dbError"],
       io: { in: "302 Location", out: "GET list" },
-      nextWhy: "doGet → handleList."
+      nextWhy: "GoodsReceiptServlet.doGet gọi handleList để lấy danh sách phiếu."
     },
     {
       id: "handle-list",
@@ -368,10 +368,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "req.setAttribute(\"receipts\", dao.findAll(keyword, status));\n" +
         "req.getRequestDispatcher(LIST_JSP).forward(req, resp);",
       explain:
-        "forward giữ cùng request GET — JSP đọc param.ok và attribute receipts. URL trình duyệt vẫn /inventory/receipts?ok=created.",
+        "Máy chủ đưa dữ liệu vào trang danh sách rồi gửi HTML về. Trình duyệt vẫn đứng ở địa chỉ /inventory/receipts?ok=created. Trang đọc tham số ok và danh sách phiếu.",
       skipOn: ["validation", "dbError"],
       io: { in: "GET", out: "RequestDispatcher → goods-receipt-list.jsp" },
-      nextWhy: "JSP render HTML."
+      nextWhy: "Trang JSP vẽ HTML danh sách cho trình duyệt hiện ra."
     },
     {
       id: "jsp-result",
@@ -384,11 +384,11 @@ window.SFE_TRACE_SAVE_DRAFT = {
         '<!-- Nghiệp vụ: "Đã lưu nháp phiếu nhập — chưa có gì vào kho." -->\n' +
         "<c:if test=\"${param.ok == 'created'}\">...</c:if>",
       explain:
-        "Người dùng thấy danh sách + thông báo lưu nháp. Kho chưa tăng — đúng giai đoạn D đặc tả nghiệp vụ.",
+        "Bạn thấy trang danh sách và thông báo: đã lưu nháp phiếu nhập — chưa có gì vào kho. Số thuốc trên kệ chưa tăng. Đây đúng giai đoạn lưu nháp trong quy trình nhập kho.",
       skipOn: ["validation", "dbError"],
       resultScreen: true,
       io: { in: "receipts + ok=created", out: "HTML danh sách" },
-      nextWhy: "Kết thúc luồng Success."
+      nextWhy: "Kết thúc luồng lưu nháp thành công."
     },
     {
       id: "validation-end",
@@ -404,10 +404,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "req.setAttribute(\"items\", items);\n" +
         "req.getRequestDispatcher(FORM_JSP).forward(req, resp);",
       explain:
-        "Không redirect. forward giữ POST request + attribute errors/items để JSP hiện lỗi và giữ input. URL có thể vẫn là ?action=create. Không ghi DB.",
+        "Máy chủ không chuyển trang. Nó trả lại cùng form, kèm danh sách lỗi và dữ liệu bạn vừa gõ để bạn sửa. Địa chỉ có thể vẫn là ?action=create. Cơ sở dữ liệu không thêm phiếu.",
       onlyOn: ["validation"],
       io: { in: "errors map", out: "HTML form với field-error" },
-      nextWhy: "Người dùng sửa và submit lại."
+      nextWhy: "Bạn sửa dữ liệu rồi bấm Lưu nháp lần nữa."
     },
     {
       id: "db-end",
@@ -420,10 +420,10 @@ window.SFE_TRACE_SAVE_DRAFT = {
         "errors.put(\"form\", \"Could not save the receipt. Please try again.\");\n" +
         "repopulateForm(req, resp, \"create\", receipt, items, errors);",
       explain:
-        "createDraft trả -1 (SQLException đã rollback). Không có GR mới. Thông báo lỗi form.",
+        "Hàm ghi phiếu createDraft trả về -1 vì câu lệnh cơ sở dữ liệu lỗi và đã hủy thay đổi. Không có phiếu mới. Form hiện thông báo không lưu được.",
       onlyOn: ["dbError"],
       io: { in: "receiptId <= 0", out: "forward form + errors.form" },
-      nextWhy: "Kết thúc nhánh lỗi DB."
+      nextWhy: "Kết thúc nhánh lỗi cơ sở dữ liệu."
     }
   ]
 };

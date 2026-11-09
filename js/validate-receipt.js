@@ -216,17 +216,27 @@
     var out = [];
     if (fieldId === "purchaseOrderId") {
       out.push(
-        check(!!trim(form.purchaseOrderId), "HTML required", "Select Đơn đặt hàng có thuộc tính required.")
+        check(
+          !!trim(form.purchaseOrderId),
+          "Trình duyệt bắt buộc phải chọn đơn đặt hàng",
+          "Ô chọn Đơn đặt hàng được đánh dấu bắt buộc trên trang web. Nếu để trống, trình duyệt có thể chặn bạn gửi form. Máy chủ Java vẫn kiểm tra lại khi bạn bấm Lưu nháp."
+        )
       );
     }
     if (fieldId === "receiptDate") {
-      out.push(check(!!trim(form.receiptDate), "HTML required", "input type=date required."));
+      out.push(
+        check(
+          !!trim(form.receiptDate),
+          "Trình duyệt bắt buộc phải có ngày nhận",
+          "Ô Ngày nhận là ô chọn ngày và được đánh dấu bắt buộc. Để trống thì trình duyệt có thể chặn gửi form."
+        )
+      );
       if (form.receiptDate) {
         out.push(
           check(
             form.receiptDate <= todayYmd(),
-            "Educational UX Validation",
-            "Trình duyệt có thể cảnh báo ngày tương lai; servlet mới là chuẩn (after(today))."
+            "Trình duyệt cảnh báo nếu chọn ngày sau hôm nay",
+            "Bài học này cảnh báo ngay trên màn hình khi ngày nhận ở tương lai. Kết luận cuối cùng vẫn do máy chủ Java quyết định khi bạn bấm Lưu nháp."
           )
         );
       }
@@ -235,39 +245,79 @@
       out.push(
         check(
           (form.invoiceNumber || "").length <= 100,
-          "HTML maxlength=100",
-          "Không bắt buộc."
+          "Không được gõ quá 100 ký tự",
+          "Số hóa đơn không bắt buộc. Bạn có thể để trống. Nếu điền thì tối đa 100 ký tự."
         )
       );
     }
     if (fieldId === "note") {
       out.push(
-        check((form.note || "").length <= 500, "HTML maxlength=500", "Không bắt buộc.")
+        check(
+          (form.note || "").length <= 500,
+          "Không được gõ quá 500 ký tự",
+          "Ghi chú không bắt buộc. Bạn có thể để trống. Nếu điền thì tối đa 500 ký tự."
+        )
       );
     }
     if (fieldId === "poItemId") {
-      out.push(check(!!trim(item.poItemId), "HTML required", "Mỗi dòng phải chọn sản phẩm."));
+      out.push(
+        check(
+          !!trim(item.poItemId),
+          "Trình duyệt bắt buộc mỗi dòng phải chọn sản phẩm",
+          "Mỗi dòng hàng phải chọn một sản phẩm thuộc đơn đặt hàng. Để trống thì trình duyệt có thể chặn gửi form."
+        )
+      );
     }
     if (fieldId === "batchNumber") {
       out.push(
-        check(!!trim(item.batchNumber), "HTML required", "maxlength=100, bắt buộc trên mọi dòng.")
+        check(
+          !!trim(item.batchNumber),
+          "Trình duyệt bắt buộc phải có số lô",
+          "Mọi dòng hàng đều phải có số lô, tối đa 100 ký tự. Thiếu số lô thì trình duyệt có thể chặn gửi form."
+        )
       );
     }
     if (fieldId === "expiryDate") {
-      out.push(check(!!trim(item.expiryDate), "HTML required", "input type=date required."));
+      out.push(
+        check(
+          !!trim(item.expiryDate),
+          "Trình duyệt bắt buộc phải có hạn dùng",
+          "Ô hạn dùng là ô chọn ngày và được đánh dấu bắt buộc trên mỗi dòng."
+        )
+      );
     }
     if (fieldId === "quantity") {
       var q = Number(item.quantity);
-      out.push(check(item.quantity !== "" && item.quantity != null, "HTML required", "Bắt buộc."));
       out.push(
-        check(!(item.quantity !== "" && q < 1), "HTML min=1", "type=number min=1 — trình duyệt có thể chặn submit.")
+        check(
+          item.quantity !== "" && item.quantity != null,
+          "Trình duyệt bắt buộc phải có số lượng",
+          "Mỗi dòng phải có số lượng. Để trống thì trình duyệt có thể chặn gửi form."
+        )
+      );
+      out.push(
+        check(
+          !(item.quantity !== "" && q < 1),
+          "Số lượng trên form phải từ 1 trở lên",
+          "Ô số lượng được đặt tối thiểu là 1. Nếu gõ 0 hoặc số âm, trình duyệt có thể chặn gửi form."
+        )
       );
     }
     if (fieldId === "costPrice") {
       var c = Number(item.costPrice);
-      out.push(check(item.costPrice !== "" && item.costPrice != null, "HTML required", "Bắt buộc."));
       out.push(
-        check(!(item.costPrice !== "" && c < 0), "HTML min=0", "Giá không được âm trên form.")
+        check(
+          item.costPrice !== "" && item.costPrice != null,
+          "Trình duyệt bắt buộc phải có giá nhập",
+          "Mỗi dòng phải có giá nhập. Để trống thì trình duyệt có thể chặn gửi form."
+        )
+      );
+      out.push(
+        check(
+          !(item.costPrice !== "" && c < 0),
+          "Giá nhập trên form không được âm",
+          "Ô giá nhập được đặt tối thiểu là 0. Giá âm thì trình duyệt có thể chặn gửi form."
+        )
       );
     }
     if (fieldId === "binId" || fieldId === "zoneRack") {
@@ -275,8 +325,8 @@
       out.push(
         check(
           !needBin || !!trim(item.binId),
-          "JS JSP: bin.required khi CHAP_NHAN",
-          "goods-receipt-form.jsp toggleBinRequired — Educational UX + HTML5, servlet vẫn kiểm lại."
+          "Khi chọn Chấp nhận, trình duyệt bắt buộc phải chọn ngăn",
+          "Trang gốc dùng JavaScript để bắt buộc ô Ngăn khi kết quả kiểm tra là Chấp nhận. Đây chỉ là kiểm tra trên màn hình. Máy chủ Java vẫn kiểm tra lại khi Lưu nháp."
         )
       );
     }
@@ -285,8 +335,8 @@
       out.push(
         check(
           !needR || !!trim(item.rejectionReason),
-          "JS: hiện + required khi TU_CHOI",
-          "Dòng Từ chối thiếu lý do: trình duyệt có thể chặn; servlet cũng chặn."
+          "Khi chọn Từ chối, trình duyệt bắt buộc phải có lý do",
+          "Ô lý do hiện ra khi bạn chọn Từ chối. Thiếu lý do thì trình duyệt có thể chặn gửi form. Máy chủ Java cũng từ chối nếu thiếu."
         )
       );
     }
@@ -294,18 +344,28 @@
       out.push(
         check(
           ["CHO_KIEM_TRA", "CHAP_NHAN", "TU_CHOI"].indexOf(item.inspectionResult) >= 0,
-          "3 option trên select",
-          "Mặc định CHO_KIEM_TRA."
+          "Phải chọn một trong ba kết quả kiểm tra",
+          "Ba lựa chọn là Chờ kiểm tra, Chấp nhận, hoặc Từ chối. Mặc định là Chờ kiểm tra. Lưu nháp vẫn cho phép để Chờ kiểm tra."
         )
       );
     }
     if (fieldId === "saveDraft") {
       out.push(
-        check(true, "submit POST", "Nút Lưu nháp serialize form — chưa chạy servlet cho đến khi mô phỏng POST.")
+        check(
+          true,
+          "Nút Lưu nháp gửi toàn bộ form lên máy chủ",
+          "Khi bạn bấm nút, trình duyệt gom mọi ô có tên rồi gửi đi bằng phương thức POST. Chương trình Java trên máy chủ chưa chạy cho đến khi yêu cầu đó được gửi (ở bài học này: khi mô phỏng Lưu nháp)."
+        )
       );
     }
     if (fieldId === "supplierName") {
-      out.push(check(true, "readonly", "Không validate — không gửi lên server."));
+      out.push(
+        check(
+          true,
+          "Ô chỉ đọc, không gõ được",
+          "Bạn không nhập nhà cung cấp. Ô này không được gửi lên máy chủ. Máy chủ tự lấy nhà cung cấp từ đơn đặt hàng đã chọn."
+        )
+      );
     }
     return out;
   }
@@ -319,65 +379,152 @@
         pass: pass,
         label: label,
         message: msg,
-        runsWhen: "Khi POST Lưu nháp — validateReceipt(..., false)"
+        runsWhen:
+          "Chỉ chạy thật khi bạn bấm Lưu nháp. Chương trình kiểm tra tên validateReceipt, chế độ lưu nháp (không bắt buộc đã kiểm tra xong từng dòng)."
       });
     }
     if (fieldId === "purchaseOrderId") {
-      add(!draft.errors.purchaseOrderId, "PO bắt buộc + còn nhận", draft.errors.purchaseOrderId || "PO mở nhận (DA_DAT_HANG / DA_NHAN_MOT_PHAN).");
+      add(
+        !draft.errors.purchaseOrderId,
+        "Máy chủ bắt buộc đơn đặt hàng còn đang mở để nhận",
+        draft.errors.purchaseOrderId
+          ? "Máy chủ từ chối. Thông báo gốc: " + draft.errors.purchaseOrderId
+          : "Đơn đã chọn tồn tại và còn mở: trạng thái Đã đặt hàng (DA_DAT_HANG) hoặc Đã nhận một phần (DA_NHAN_MOT_PHAN)."
+      );
     }
     if (fieldId === "supplierName") {
-      add(true, "supplierId từ PO", "Không đọc supplier từ form.");
+      add(
+        true,
+        "Máy chủ tự lấy nhà cung cấp từ đơn đặt hàng",
+        "Chương trình không đọc ô Nhà cung cấp trên form. Nó lấy mã nhà cung cấp từ đơn đặt hàng rồi gắn vào phiếu."
+      );
     }
     if (fieldId === "receiptDate") {
-      add(!draft.errors.receiptDate, "Không tương lai", draft.errors.receiptDate || "Ngày hợp lệ.");
+      add(
+        !draft.errors.receiptDate,
+        "Máy chủ không cho ngày nhận ở tương lai",
+        draft.errors.receiptDate
+          ? "Máy chủ từ chối. Thông báo gốc: " + draft.errors.receiptDate
+          : "Ngày nhận có giá trị và không sau hôm nay."
+      );
     }
     if (fieldId === "invoiceNumber" || fieldId === "note") {
-      add(true, "Không bắt buộc", "trim; không rule lỗi riêng.");
+      add(
+        true,
+        "Máy chủ không bắt buộc ô này",
+        "Chương trình chỉ cắt khoảng trắng thừa. Thiếu số hóa đơn hoặc ghi chú không bị xem là lỗi khi Lưu nháp."
+      );
     }
     if (fieldId === "poItemId" || fieldId === "quantity" || fieldId === "saveDraft") {
       if (draft.itemCount === 0) {
-        add(false, "Cần ít nhất một dòng", "Add at least one received batch line.");
+        add(
+          false,
+          "Máy chủ bắt buộc phải có ít nhất một dòng hàng",
+          "Chưa có dòng sản phẩm hợp lệ. Thông báo gốc: Add at least one received batch line."
+        );
       }
     }
     if (fieldId === "poItemId") {
-      add(!draft.flags.itemNotInPo, "Thuộc PO đã chọn", draft.flags.itemNotInPo ? "Every line must be a product of the selected purchase order." : "product_id lấy từ PO.");
+      add(
+        !draft.flags.itemNotInPo,
+        "Sản phẩm phải thuộc đơn đặt hàng đã chọn",
+        draft.flags.itemNotInPo
+          ? "Có dòng không thuộc đơn đang chọn. Thông báo gốc: Every line must be a product of the selected purchase order."
+          : "Mã sản phẩm được lấy từ đơn đặt hàng, không tin giá trị tự gõ trên form."
+      );
     }
     if (fieldId === "batchNumber") {
-      add(!draft.flags.batchMissing, "Batch bắt buộc mọi dòng", draft.flags.batchMissing ? "Batch number is required on every line." : "OK.");
+      add(
+        !draft.flags.batchMissing,
+        "Máy chủ bắt buộc mọi dòng phải có số lô",
+        draft.flags.batchMissing
+          ? "Có dòng thiếu số lô. Thông báo gốc: Batch number is required on every line."
+          : "Mọi dòng đều đã có số lô."
+      );
     }
     if (fieldId === "expiryDate") {
-      add(!draft.flags.expiryMissing, "Hạn dùng bắt buộc", draft.flags.expiryMissing ? "Expiry date is required on every line." : "OK.");
-      add(!draft.flags.expired, "Hết hạn + CHAP_NHAN", draft.flags.expired ? "Thuốc đã hết hạn vào ngày nhận không thể được chấp nhận — hãy đánh dấu TU_CHOI." : "Không dính rule hết hạn+chấp nhận.");
+      add(
+        !draft.flags.expiryMissing,
+        "Máy chủ bắt buộc mọi dòng phải có hạn dùng",
+        draft.flags.expiryMissing
+          ? "Có dòng thiếu hạn dùng. Thông báo gốc: Expiry date is required on every line."
+          : "Mọi dòng đều đã có hạn dùng."
+      );
+      add(
+        !draft.flags.expired,
+        "Không được Chấp nhận lô đã hết hạn vào ngày nhận",
+        draft.flags.expired
+          ? "Thuốc đã hết hạn vào ngày nhận không thể được chấp nhận — hãy đánh dấu Từ chối."
+          : "Không dính quy tắc hết hạn cộng với Chấp nhận."
+      );
     }
     if (fieldId === "quantity") {
-      add(!draft.flags.badQty, "Quantity > 0", draft.flags.badQty ? "Quantity must be greater than 0." : "OK.");
-      add(!draft.flags.overdelivered, "Tổng CHAP_NHAN ≤ remaining", draft.flags.overdelivered ? "Accepted quantity exceeds the remaining quantity on the purchase order." : "Chưa vượt phần còn lại (chỉ cộng dòng Chấp nhận).");
+      add(
+        !draft.flags.badQty,
+        "Số lượng trên máy chủ phải lớn hơn 0",
+        draft.flags.badQty
+          ? "Có dòng số lượng bằng 0 hoặc không hợp lệ. Thông báo gốc: Quantity must be greater than 0."
+          : "Số lượng trên các dòng đều lớn hơn 0."
+      );
+      add(
+        !draft.flags.overdelivered,
+        "Tổng số lượng Chấp nhận không được vượt phần còn lại trên đơn",
+        draft.flags.overdelivered
+          ? "Tổng số lượng Chấp nhận lớn hơn số còn lại trên đơn đặt hàng. Thông báo gốc: Accepted quantity exceeds the remaining quantity on the purchase order."
+          : "Chưa vượt phần còn lại. Máy chủ chỉ cộng các dòng đánh Chấp nhận, không cộng dòng Chờ kiểm tra hay Từ chối."
+      );
     }
     if (fieldId === "costPrice") {
-      add(!draft.flags.badCost, "Cost ≥ 0", draft.flags.badCost ? "Cost price must be 0 or greater." : "OK.");
+      add(
+        !draft.flags.badCost,
+        "Giá nhập trên máy chủ phải từ 0 trở lên",
+        draft.flags.badCost
+          ? "Có dòng giá nhập bị thiếu hoặc bị âm. Thông báo gốc: Cost price must be 0 or greater."
+          : "Giá nhập trên các dòng đều hợp lệ."
+      );
     }
     if (fieldId === "zoneRack") {
-      add(true, "Không đọc zone/rack", "Servlet không nhận zoneId/rackId.");
+      add(
+        true,
+        "Máy chủ phiếu nhập không đọc Khu và Kệ",
+        "GoodsReceiptServlet không nhận mã khu hay mã kệ. Hai ô này chỉ giúp bạn tìm ngăn trên màn hình. Giá trị gửi lên máy chủ là mã ngăn (binId)."
+      );
     }
     if (fieldId === "binId") {
       add(
         !draft.flags.binMissing,
-        "CHAP_NHAN phải có Bin (cả lúc nháp)",
+        "Dòng Chấp nhận phải có ngăn, kể cả khi chỉ lưu nháp",
         draft.flags.binMissing
-          ? "Mỗi dòng Chấp nhận phải chọn Khu / Kệ / Ngăn đặt hàng."
+          ? "Có dòng Chấp nhận chưa chọn ngăn. Thông báo gốc: Mỗi dòng Chấp nhận phải chọn Khu / Kệ / Ngăn đặt hàng."
           : item.inspectionResult === "CHAP_NHAN"
-            ? "Dòng Chấp nhận đã có Bin."
-            : "Dòng chưa Chấp nhận — Bin không bắt buộc trên nháp."
+            ? "Dòng Chấp nhận đã có ngăn."
+            : "Dòng chưa phải Chấp nhận nên ngăn không bắt buộc lúc lưu nháp."
       );
     }
     if (fieldId === "inspectionResult") {
-      add(true, "CHO_KIEM_TRA được nháp", "strict=false không chặn Chờ kiểm tra. Confirm (strict=true) mới cấm.");
+      add(
+        true,
+        "Lưu nháp vẫn cho phép Chờ kiểm tra",
+        "Chế độ lưu nháp (strict = false) không chặn kết quả Chờ kiểm tra. Chỉ bước Xác nhận sau này (strict = true) mới bắt buộc mọi dòng phải Chấp nhận hoặc Từ chối. Bài học này không chạy bước Xác nhận."
+      );
     }
     if (fieldId === "rejectionReason") {
-      add(!draft.flags.reasonMissing, "TU_CHOI cần lý do", draft.flags.reasonMissing ? "A rejection reason is required for every rejected line." : "OK.");
+      add(
+        !draft.flags.reasonMissing,
+        "Dòng Từ chối phải có lý do",
+        draft.flags.reasonMissing
+          ? "Có dòng Từ chối thiếu lý do. Thông báo gốc: A rejection reason is required for every rejected line."
+          : "Không có dòng Từ chối nào thiếu lý do."
+      );
     }
     if (fieldId === "saveDraft") {
-      add(draft.ok, "validateReceipt(false)", draft.ok ? "errors rỗng — mới được gọi createDraft." : firstError(draft.errors));
+      add(
+        draft.ok,
+        "Máy chủ kiểm tra toàn bộ phiếu trước khi ghi",
+        draft.ok
+          ? "Không còn lỗi. Chỉ khi đó chương trình mới gọi GoodsReceiptDAO.createDraft để ghi phiếu bản nháp vào cơ sở dữ liệu."
+          : "Còn lỗi nên chương trình chưa ghi phiếu. Chi tiết: " + firstError(draft.errors)
+      );
     }
     return out;
   }
@@ -392,9 +539,9 @@
     return [
       {
         pass: null,
-        label: "Chỉ lúc Xác nhận — không chạy khi Lưu nháp",
+        label: "Các bước này chỉ chạy khi Xác nhận nhập kho — bài học này không làm",
         message:
-          "GoodsReceiptDAO.confirm: phiếu còn BAN_NHAP; PO còn mở; Bin tồn tại + HOAT_DONG; lô/hạn không xung đột; kiểm lại SL chấp nhận; cộng tồn + NHAP_KHO trong một transaction."
+          "Khi có người bấm Xác nhận sau này, chương trình GoodsReceiptDAO.confirm mới chạy. Lúc đó nó kiểm tra phiếu vẫn còn bản nháp, đơn đặt hàng vẫn còn mở, ngăn chứa hàng tồn tại và đang hoạt động, số lô với hạn dùng không xung đột, số lượng chấp nhận vẫn hợp lệ, rồi mới cộng thuốc vào kệ và ghi sổ nhập kho trong một lần lưu. Nút Lưu nháp không chạy hàm này, nên số thuốc trên kệ không tăng."
       }
     ];
   }

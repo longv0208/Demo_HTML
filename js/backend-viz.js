@@ -6,51 +6,51 @@
   "use strict";
 
   var ACTORS = [
-    { id: "browser", label: "Browser", sub: "JSP / JS" },
-    { id: "servlet", label: "GoodsReceiptServlet", sub: "/inventory/receipts" },
-    { id: "dao", label: "DAO", sub: "chưa gọi" },
-    { id: "mysql", label: "MySQL", sub: "JDBC" }
+    { id: "browser", label: "Trình duyệt", sub: "Màn hình bạn đang điền" },
+    { id: "servlet", label: "GoodsReceiptServlet", sub: "Điều khiển phiếu nhập" },
+    { id: "dao", label: "DAO", sub: "Chưa được gọi" },
+    { id: "mysql", label: "MySQL", sub: "Nơi lưu dữ liệu" }
   ];
 
   function actorsOf(kind) {
-    var browser = { id: "browser", label: "Browser", sub: "JSP / JS" };
-    var mysql = { id: "mysql", label: "MySQL", sub: "JDBC" };
+    var browser = { id: "browser", label: "Trình duyệt", sub: "Màn hình bạn đang điền" };
+    var mysql = { id: "mysql", label: "MySQL", sub: "Nơi lưu dữ liệu" };
     if (kind === "location") {
       return [
         browser,
-        { id: "servlet", label: "LocationServlet", sub: "/inventory/locations" },
-        { id: "dao", label: "LocationDAO", sub: "findRacks / findBins" },
+        { id: "servlet", label: "LocationServlet", sub: "Điều khiển khu / kệ / ngăn" },
+        { id: "dao", label: "LocationDAO", sub: "Đọc kệ và ngăn" },
         mysql
       ];
     }
     if (kind === "po") {
       return [
         browser,
-        { id: "servlet", label: "GoodsReceiptServlet", sub: "/inventory/receipts" },
-        { id: "dao", label: "PurchaseOrderDAO", sub: "findReceivable" },
+        { id: "servlet", label: "GoodsReceiptServlet", sub: "Điều khiển phiếu nhập" },
+        { id: "dao", label: "PurchaseOrderDAO", sub: "Đọc đơn đặt hàng" },
         mysql
       ];
     }
     if (kind === "save") {
       return [
         browser,
-        { id: "servlet", label: "GoodsReceiptServlet", sub: "/inventory/receipts" },
-        { id: "dao", label: "GoodsReceiptDAO", sub: "createDraft" },
+        { id: "servlet", label: "GoodsReceiptServlet", sub: "Điều khiển phiếu nhập" },
+        { id: "dao", label: "GoodsReceiptDAO", sub: "Ghi phiếu bản nháp" },
         mysql
       ];
     }
     if (kind === "list") {
       return [
         browser,
-        { id: "servlet", label: "GoodsReceiptServlet", sub: "/inventory/receipts" },
-        { id: "dao", label: "GoodsReceiptDAO", sub: "findAll" },
+        { id: "servlet", label: "GoodsReceiptServlet", sub: "Điều khiển phiếu nhập" },
+        { id: "dao", label: "GoodsReceiptDAO", sub: "Đọc danh sách phiếu" },
         mysql
       ];
     }
     return [
       browser,
-      { id: "servlet", label: "GoodsReceiptServlet", sub: "chưa gọi doGet/doPost" },
-      { id: "dao", label: "DAO", sub: "chưa gọi" },
+      { id: "servlet", label: "GoodsReceiptServlet", sub: "Chưa nhận yêu cầu" },
+      { id: "dao", label: "DAO", sub: "Chưa được gọi" },
       mysql
     ];
   }
@@ -193,15 +193,15 @@
     var field = ((global.SFE_LESSON.getAction() || {}).fieldId) || "field";
     var live = form[field];
     if (live == null) live = item[field];
-    if (live == null && field === "saveDraft") live = "chưa POST";
+    if (live == null && field === "saveDraft") live = "chưa gửi đi";
     return {
-      title: "Chưa gửi đến server",
-      summary: "Chỉ Browser. GoodsReceiptServlet / LocationServlet chưa nhận HTTP.",
+      title: "Bạn đang điền form, chưa gửi đến máy chủ",
+      summary: "Dữ liệu mới chỉ nằm trên trình duyệt. Chương trình Java GoodsReceiptServlet và LocationServlet chưa nhận yêu cầu nào.",
       ran: false,
       actors: actorsOf("idle"),
       messages: [
-        msg("browser", "browser", field + " = " + String(live == null ? "" : live), {
-          note: "GoodsReceiptServlet.doGet / doPost chưa chạy. LocationServlet cũng chưa.",
+        msg("browser", "browser", "Giá trị trên form: " + field + " = " + String(live == null ? "" : live), {
+          note: "Bạn đang gõ trên màn hình. Máy chủ Java chưa được gọi. Hàm doGet và doPost của GoodsReceiptServlet chưa chạy. LocationServlet cũng chưa chạy. Cơ sở dữ liệu chưa đổi.",
           kind: "self"
         })
       ]
@@ -211,35 +211,38 @@
   function walkPo(form, catalog) {
     var po = poOf(form, catalog);
     return {
-      title: "GET reload form theo PO",
-      summary: "Browser → GoodsReceiptServlet.handleNewForm → PurchaseOrderDAO → MySQL SELECT → forward JSP.",
+      title: "Đổi đơn đặt hàng — tải lại form",
+      summary: "Trình duyệt xin máy chủ mở lại trang theo đơn vừa chọn. GoodsReceiptServlet đọc đơn đặt hàng, chưa ghi phiếu mới.",
       ran: true,
       actors: actorsOf("po"),
       messages: [
-        msg("browser", "servlet", "GET GoodsReceiptServlet?action=new&po=" + (form.purchaseOrderId || ""), {
-          note: "GoodsReceiptServlet.doGet → handleNewForm. @WebServlet(\"/inventory/receipts\").",
+        msg("browser", "servlet", "Gửi yêu cầu mở lại form theo đơn vừa chọn", {
+          note: "Bạn đổi ô Đơn đặt hàng. Trình duyệt gửi yêu cầu GET tới địa chỉ /inventory/receipts với action=new và mã đơn (po). Chương trình nhận yêu cầu tên GoodsReceiptServlet, hàm doGet rồi gọi handleNewForm. Đây chỉ là tải lại trang, chưa lưu phiếu.",
           file: GH.servlet,
           line: 118
         }),
-        msg("servlet", "dao", "PurchaseOrderDAO.findReceivable()", {
-          note: "Chỉ DA_DAT_HANG / DA_NHAN_MOT_PHAN.",
+        msg("servlet", "dao", "Hỏi danh sách đơn đặt hàng còn nhận hàng", {
+          note: "GoodsReceiptServlet nhờ chương trình PurchaseOrderDAO, hàm findReceivable. Chỉ lấy đơn còn mở: Đã đặt hàng (DA_DAT_HANG) hoặc Đã nhận một phần (DA_NHAN_MOT_PHAN).",
           file: GH.poDao,
           line: 151
         }),
-        msg("dao", "mysql", "SELECT purchase_orders WHERE status IN (...)", {
+        msg("dao", "mysql", "Đọc bảng đơn đặt hàng còn mở", {
+          note: "Câu lệnh chỉ đọc, không sửa dữ liệu. Máy chủ cơ sở dữ liệu MySQL trả về các đơn đủ điều kiện nhận hàng.",
           sql: "SELECT po.*, s.supplier_name ...\nFROM purchase_orders po\nWHERE po.status IN ('DA_DAT_HANG','DA_NHAN_MOT_PHAN')"
         }),
-        ret("mysql", "dao", "ResultSet PO mở", { note: "Chỉ đọc." }),
-        msg("servlet", "dao", "PurchaseOrderDAO.findById + findItems", {
+        ret("mysql", "dao", "Trả về các đơn còn mở", { note: "Chỉ đọc. Không thêm, không sửa, không xóa dòng nào." }),
+        msg("servlet", "dao", "Hỏi chi tiết đơn vừa chọn và từng dòng hàng", {
+          note: "Tiếp theo, PurchaseOrderDAO.findById và findItems lấy nhà cung cấp cùng danh sách sản phẩm của đúng đơn bạn vừa chọn.",
           file: GH.servlet,
           line: 618
         }),
-        msg("dao", "mysql", "SELECT … WHERE purchase_order_id = " + (form.purchaseOrderId || "?"), {
+        msg("dao", "mysql", "Đọc dòng hàng của đơn " + (form.purchaseOrderId || "?"), {
+          note: "Vẫn chỉ đọc. Kết quả dùng để vẽ lại các ô sản phẩm trên form.",
           sql: "SELECT i.*, p.product_name, p.sku\nFROM purchase_order_items i JOIN products p …\nWHERE i.purchase_order_id = " + (form.purchaseOrderId || "?")
         }),
-        ret("mysql", "dao", po ? po.supplierName + " · " + (po.items || []).length + " dòng" : "null"),
-        ret("servlet", "browser", "GoodsReceiptServlet.forward FORM_JSP", {
-          note: "HTML form với poItems mới. Cùng URL GET, không 302.",
+        ret("mysql", "dao", po ? "Nhà cung cấp " + po.supplierName + ", " + (po.items || []).length + " dòng hàng" : "Không tìm thấy đơn"),
+        ret("servlet", "browser", "Trả lại trang form đã điền sẵn", {
+          note: "GoodsReceiptServlet không chuyển sang địa chỉ khác. Nó đưa dữ liệu vào trang JSP rồi gửi HTML form mới về trình duyệt, với danh sách sản phẩm của đơn vừa chọn.",
           file: GH.servlet,
           line: 136
         })
@@ -254,30 +257,37 @@
       ? (((catalog.locations || {}).racksByZone || {})[it.zoneId] || [])
       : (((catalog.locations || {}).binsByRack || {})[it.rackId] || []);
     return {
-      title: isZone ? "GET JSON kệ theo khu" : "GET JSON ngăn theo kệ",
-      summary: "Browser fetch → LocationServlet (không phải GoodsReceiptServlet) → LocationDAO.",
+      title: isZone ? "Chọn khu — tải danh sách kệ" : "Chọn kệ — tải danh sách ngăn",
+      summary: isZone
+        ? "Trình duyệt hỏi danh sách kệ trong khu vừa chọn. Chương trình nhận yêu cầu là LocationServlet, không phải GoodsReceiptServlet."
+        : "Trình duyệt hỏi danh sách ngăn trên kệ vừa chọn. Chương trình nhận yêu cầu là LocationServlet, không phải GoodsReceiptServlet.",
       ran: true,
       actors: actorsOf("location"),
       messages: [
         msg("browser", "servlet", isZone
-          ? "GET LocationServlet?action=api-racks&zoneId=" + (it.zoneId || "")
-          : "GET LocationServlet?action=api-bins&rackId=" + (it.rackId || ""), {
+          ? "Hỏi danh sách kệ trong khu vừa chọn"
+          : "Hỏi danh sách ngăn trên kệ vừa chọn", {
           note: isZone
-            ? "LocationServlet.doGet → handleApiRacks. @WebServlet(\"/inventory/locations\")."
-            : "LocationServlet.doGet → handleApiBins. @WebServlet(\"/inventory/locations\").",
+            ? "JavaScript trên trang gửi yêu cầu GET tới /inventory/locations với action=api-racks và mã khu. LocationServlet.doGet gọi handleApiRacks. GoodsReceiptServlet không tham gia bước này."
+            : "JavaScript trên trang gửi yêu cầu GET tới /inventory/locations với action=api-bins và mã kệ. LocationServlet.doGet gọi handleApiBins. GoodsReceiptServlet không tham gia bước này.",
           file: GH.location,
           line: isZone ? 262 : 291
         }),
-        msg("servlet", "dao", isZone ? 'LocationDAO.findRacks(zoneId, null, "HOAT_DONG")' : 'LocationDAO.findBins(rackId, …, "HOAT_DONG")', {
+        msg("servlet", "dao", isZone ? "Nhờ LocationDAO tìm kệ đang hoạt động" : "Nhờ LocationDAO tìm ngăn đang hoạt động", {
+          note: isZone
+            ? "Hàm findRacks chỉ lấy kệ thuộc khu đã chọn và đang ở trạng thái hoạt động (HOAT_DONG)."
+            : "Hàm findBins chỉ lấy ngăn thuộc kệ đã chọn và đang ở trạng thái hoạt động (HOAT_DONG).",
           file: GH.locDao,
           line: isZone ? 192 : 328
         }),
-        msg("dao", "mysql", isZone ? "SELECT storage_racks WHERE zone_id=? AND status='HOAT_DONG'" : "SELECT storage_bins WHERE rack_id=? AND status='HOAT_DONG'"),
-        ret("mysql", "dao", list.length + " hàng HOAT_DONG"),
-        ret("servlet", "browser", "JSON " + JSON.stringify(list.map(function (x) {
-          return isZone ? { rackId: x.id, rackCode: x.code } : { binId: x.id, binCode: x.code };
-        })), {
-          note: "JS đổ <select>. Không forward JSP."
+        msg("dao", "mysql", isZone ? "Đọc bảng kệ đang hoạt động" : "Đọc bảng ngăn đang hoạt động", {
+          note: "Câu lệnh chỉ đọc. Không ghi phiếu nhập, không đổi số thuốc trên kệ."
+        }),
+        ret("mysql", "dao", "Trả về " + list.length + " mục đang hoạt động", {
+          note: "Máy chủ cơ sở dữ liệu trả danh sách cho chương trình LocationDAO."
+        }),
+        ret("servlet", "browser", "Gửi danh sách về trình duyệt để hiện lên ô chọn", {
+          note: "LocationServlet trả dữ liệu dạng JSON, không vẽ lại cả trang. JavaScript đổ danh sách vào ô Kệ hoặc ô Ngăn. Mã khu và mã kệ không được gửi khi Lưu nháp — máy chủ phiếu nhập chỉ nhận mã ngăn."
         })
       ]
     };
@@ -286,20 +296,28 @@
   function walkCancel(sim) {
     var n = ((sim && sim.goodsReceipts) || []).length;
     return {
-      title: "Hủy form — GET danh sách",
-      summary: "Không POST. GoodsReceiptServlet.handleList → GoodsReceiptDAO.findAll.",
+      title: "Bấm Hủy — quay về danh sách, không lưu phiếu",
+      summary: "Link Hủy chỉ xin trang danh sách. Không gửi form, không tạo phiếu mới, không gọi hàm ghi nháp.",
       ran: true,
       actors: actorsOf("list"),
       messages: [
-        msg("browser", "servlet", "GET GoodsReceiptServlet /inventory/receipts", {
-          note: "Link Hủy. GoodsReceiptServlet.doGet mặc định → handleList.",
+        msg("browser", "servlet", "Xin trang danh sách phiếu nhập", {
+          note: "Nút Hủy trên form tạo mới là một liên kết GET tới /inventory/receipts, không gửi dữ liệu form. GoodsReceiptServlet.doGet không thấy action đặc biệt nên gọi handleList. Đây không phải thao tác hủy một phiếu đã lưu.",
           file: GH.servlet,
           line: 108
         }),
-        msg("servlet", "dao", "GoodsReceiptDAO.findAll(keyword, status)", { file: GH.grDao, line: 138 }),
-        msg("dao", "mysql", "SELECT goods_receipts … ORDER BY id DESC"),
-        ret("mysql", "dao", n + " phiếu (SELECT)"),
-        ret("servlet", "browser", "forward list.jsp", { note: "Không ?ok=created." })
+        msg("servlet", "dao", "Nhờ GoodsReceiptDAO đọc danh sách phiếu", {
+          note: "Hàm findAll chỉ đọc. Không thêm phiếu, không sửa phiếu, không gọi createDraft.",
+          file: GH.grDao,
+          line: 138
+        }),
+        msg("dao", "mysql", "Đọc bảng phiếu nhập", {
+          note: "Câu lệnh SELECT chỉ xem dữ liệu đã có. Cơ sở dữ liệu không thêm dòng mới."
+        }),
+        ret("mysql", "dao", "Trả về " + n + " phiếu đang có", { note: "Chỉ đọc." }),
+        ret("servlet", "browser", "Hiện trang danh sách", {
+          note: "GoodsReceiptServlet đưa dữ liệu vào trang danh sách rồi gửi HTML về trình duyệt. Không có thông báo «đã lưu nháp», vì bạn đã hủy chứ không lưu."
+        })
       ]
     };
   }
@@ -314,21 +332,21 @@
     var firstErr = global.SFE_VALIDATE.firstError(draft.errors);
 
     var messages = [
-      msg("browser", "servlet", "POST GoodsReceiptServlet?action=create", {
-        note: "GoodsReceiptServlet.doPost → handleCreate. Body không có [].",
+      msg("browser", "servlet", "Gửi toàn bộ phiếu lên máy chủ", {
+        note: "Bạn bấm Lưu nháp. Trình duyệt gửi toàn bộ form bằng phương thức POST tới /inventory/receipts?action=create. Chương trình nhận yêu cầu tên GoodsReceiptServlet, hàm doPost rồi gọi handleCreate. Tên các ô trên form không có dấu ngoặc vuông.",
         file: GH.servlet,
         line: 76
       }),
-      msg("servlet", "servlet", "GoodsReceiptServlet.readItemsForm()", {
-        note: "readReceiptForm + readItemsForm. Dòng poItemId≤0 bị bỏ.",
+      msg("servlet", "servlet", "Đọc thông tin phiếu và từng dòng hàng", {
+        note: "Hàm readReceiptForm đọc phần đầu phiếu (đơn đặt hàng, ngày nhận, hóa đơn, ghi chú). Hàm readItemsForm đọc từng dòng hàng. Dòng chưa chọn sản phẩm sẽ bị bỏ qua.",
         file: GH.servlet,
         line: 376
       }),
-      msg("servlet", "servlet", "GoodsReceiptServlet.validateReceipt(false)", {
+      msg("servlet", "servlet", "Kiểm tra dữ liệu đã hợp lệ chưa", {
         status: fail ? "error" : "ok",
         note: fail
-          ? "errors: " + firstErr
-          : "errors rỗng. CHO_KIEM_TRA được phép. CHAP_NHAN vẫn cần Bin.",
+          ? "Hàm validateReceipt chạy ở chế độ lưu nháp (strict = false) và phát hiện lỗi. Chi tiết: " + firstErr + ". Vì chưa đạt, chương trình chưa ghi vào cơ sở dữ liệu. Dòng Chờ kiểm tra được phép. Dòng Chấp nhận vẫn phải có ngăn."
+          : "Hàm validateReceipt chạy ở chế độ lưu nháp (strict = false) và không còn lỗi. Dòng Chờ kiểm tra được phép. Dòng Chấp nhận vẫn phải có ngăn. Bây giờ mới được ghi phiếu bản nháp.",
         file: GH.servlet,
         line: 429
       })
@@ -336,20 +354,20 @@
 
     if (fail) {
       messages.push(
-        ret("servlet", "browser", "GoodsReceiptServlet.forward FORM_JSP", {
-          note: "repopulateForm. GoodsReceiptDAO.createDraft không được gọi.",
+        ret("servlet", "browser", "Trả lại form kèm thông báo lỗi", {
+          note: "GoodsReceiptServlet điền lại form bằng dữ liệu vừa gửi (repopulateForm) rồi gửi cùng trang form về trình duyệt. Chương trình ghi phiếu GoodsReceiptDAO.createDraft không được gọi. Cơ sở dữ liệu không thêm phiếu mới.",
           file: GH.servlet,
           line: 633
         }),
-        msg("servlet", "dao", "GoodsReceiptDAO.createDraft() không gọi", {
+        msg("servlet", "dao", "Không gọi hàm ghi phiếu bản nháp", {
           kind: "note",
           status: "skip",
-          note: "return trước new GoodsReceiptDAO()."
+          note: "Vì kiểm tra chưa đạt, chương trình return trước khi tạo GoodsReceiptDAO. Không có câu lệnh thêm dòng vào bảng."
         })
       );
       return {
-        title: "POST Lưu nháp — dừng ở validateReceipt",
-        summary: "GoodsReceiptServlet.validateReceipt lỗi → forward form. GoodsReceiptDAO không chạy.",
+        title: "Lưu nháp bị dừng vì dữ liệu chưa hợp lệ",
+        summary: "Máy chủ đã nhận phiếu nhưng hàm kiểm tra validateReceipt báo lỗi. Form được trả lại. Chưa ghi vào cơ sở dữ liệu.",
         ran: true,
         actors: actorsOf("save"),
         messages: messages
@@ -357,13 +375,14 @@
     }
 
     messages.push(
-      msg("servlet", "dao", "GoodsReceiptDAO.createDraft(receipt, items)", {
-        note: 'GoodsReceiptServlet: receipt.setStatus("BAN_NHAP") rồi new GoodsReceiptDAO().',
+      msg("servlet", "dao", "Nhờ chương trình ghi phiếu bản nháp", {
+        note: "GoodsReceiptServlet gán trạng thái phiếu là bản nháp (BAN_NHAP) rồi gọi GoodsReceiptDAO.createDraft với phiếu và danh sách dòng hàng.",
         file: GH.servlet,
         line: 206
       }),
-      msg("dao", "mysql", "INSERT goods_receipts … 'BAN_NHAP'", {
+      msg("dao", "mysql", "Thêm một phiếu mới, trạng thái bản nháp", {
         status: dbErr ? "error" : "ok",
+        note: "Câu lệnh thêm một dòng vào bảng phiếu nhập goods_receipts. Cột trạng thái mang giá trị BAN_NHAP, nghĩa là bản nháp. Số thuốc trên kệ chưa đổi.",
         sql: insertReceiptSql(form, catalog),
         file: GH.grDao,
         line: 250
@@ -372,14 +391,14 @@
 
     if (dbErr) {
       messages.push(
-        ret("mysql", "dao", "SQLException", { kind: "error", status: "error" }),
-        msg("dao", "mysql", "ROLLBACK", { kind: "error", status: "error", note: "createDraft failed — rolled back" }),
-        ret("dao", "servlet", "return -1", { kind: "error", status: "error" }),
-        ret("servlet", "browser", "forward form · Could not save", { status: "error" })
+        ret("mysql", "dao", "Cơ sở dữ liệu báo lỗi khi ghi", { kind: "error", status: "error", note: "Đây là tình huống học tập: câu lệnh thêm dòng thất bại." }),
+        msg("dao", "mysql", "Hủy toàn bộ thay đổi vừa thử ghi", { kind: "error", status: "error", note: "Hàm createDraft gọi rollback. Phiếu mới không được giữ lại." }),
+        ret("dao", "servlet", "Báo không lưu được (mã -1)", { kind: "error", status: "error", note: "createDraft trả về -1 để GoodsReceiptServlet biết ghi thất bại." }),
+        ret("servlet", "browser", "Trả lại form với thông báo không lưu được", { status: "error", note: "Người dùng vẫn ở trang form. Không có phiếu mới trên danh sách." })
       );
       return {
-        title: "POST Lưu nháp — DAO lỗi [DEMO SCENARIO]",
-        summary: "GoodsReceiptDAO.createDraft SQLException → rollback. Không COMMIT.",
+        title: "Lưu nháp thất bại vì lỗi cơ sở dữ liệu (tình huống học)",
+        summary: "Hàm ghi phiếu createDraft gặp lỗi. Mọi thay đổi bị hủy. Cơ sở dữ liệu không giữ phiếu mới.",
         ran: true,
         actors: actorsOf("save"),
         messages: messages
@@ -387,38 +406,53 @@
     }
 
     messages.push(
-      ret("mysql", "dao", "generatedKeys id=" + recId),
-      msg("dao", "mysql", "INSERT goods_receipt_items · batch_id=NULL", {
+      ret("mysql", "dao", "Trả về mã phiếu vừa tạo: " + recId, {
+        note: "MySQL cấp mã tự tăng cho phiếu mới. Chương trình dùng mã này để gắn các dòng hàng."
+      }),
+      msg("dao", "mysql", "Thêm từng dòng hàng vào bảng chi tiết", {
         sql: insertItemSql(form, catalog, recId),
         file: GH.grDao,
         line: 296,
-        note: "Tồn kho chưa có lô."
+        note: "Mỗi dòng trên form thành một dòng trong bảng goods_receipt_items. Cột lô tồn kho (batch_id) để trống vì lưu nháp chưa tạo lô trên kệ."
       }),
-      ret("mysql", "dao", "OK · " + ((form.items || []).length) + " dòng"),
-      msg("dao", "mysql", "COMMIT", {
-        note: "inventory_* / PO received / NHAP_KHO không có trong createDraft.",
+      ret("mysql", "dao", "Đã ghi " + ((form.items || []).length) + " dòng hàng", {
+        note: "Các dòng hàng đã vào bảng chi tiết, vẫn chưa cộng số thuốc trên kệ."
+      }),
+      msg("dao", "mysql", "Xác nhận lưu vĩnh viễn", {
+        note: "COMMIT nghĩa là giữ những dòng vừa thêm. Hàm createDraft không đụng bảng tồn kho, không tăng số lượng đã nhận trên đơn đặt hàng, không ghi sổ xuất-nhập kho.",
         file: GH.grDao,
         line: 319
       }),
-      ret("dao", "servlet", "receiptId=" + recId),
-      ret("servlet", "browser", "GoodsReceiptServlet.sendRedirect ?ok=created", {
+      ret("dao", "servlet", "Trả về mã phiếu " + recId, {
+        note: "GoodsReceiptServlet nhận mã phiếu để chuyển người dùng sang trang danh sách."
+      }),
+      ret("servlet", "browser", "Bảo trình duyệt mở trang danh sách", {
+        note: "Máy chủ gửi lệnh chuyển trang (redirect) tới /inventory/receipts?ok=created. Trình duyệt sẽ gửi một yêu cầu GET mới, không còn dữ liệu POST.",
         file: GH.servlet,
         line: 212
       }),
-      msg("browser", "servlet", "GET GoodsReceiptServlet?ok=created", {
-        note: "Request mới sau redirect. GoodsReceiptServlet.doGet → handleList.",
+      msg("browser", "servlet", "Xin trang danh sách phiếu nhập", {
+        note: "Đây là yêu cầu mới sau khi chuyển trang. GoodsReceiptServlet.doGet gọi handleList. Tham số ok=created dùng để hiện thông báo thành công.",
         file: GH.servlet,
         line: 108
       }),
-      msg("servlet", "dao", "GoodsReceiptDAO.findAll()"),
-      msg("dao", "mysql", "SELECT goods_receipts …"),
-      ret("mysql", "dao", "list gồm phiếu BAN_NHAP"),
-      ret("servlet", "browser", "forward list.jsp · «chưa có gì vào kho.»")
+      msg("servlet", "dao", "Nhờ đọc danh sách phiếu", {
+        note: "Hàm GoodsReceiptDAO.findAll chỉ đọc. Phiếu bản nháp vừa tạo sẽ xuất hiện trong danh sách."
+      }),
+      msg("dao", "mysql", "Đọc bảng phiếu nhập", {
+        note: "Câu lệnh SELECT xem các phiếu đã có, gồm phiếu bản nháp vừa lưu."
+      }),
+      ret("mysql", "dao", "Danh sách gồm phiếu bản nháp vừa tạo", {
+        note: "Phiếu mới có trạng thái BAN_NHAP. Số thuốc trên kệ vẫn như cũ."
+      }),
+      ret("servlet", "browser", "Hiện danh sách kèm thông báo chưa vào kho", {
+        note: "Trang danh sách hiện dòng: «Đã lưu nháp phiếu nhập — chưa có gì vào kho.» Đó là kết quả đúng của nút Lưu nháp."
+      })
     );
 
     return {
-      title: "POST Lưu nháp — COMMIT BAN_NHAP",
-      summary: "GoodsReceiptServlet.handleCreate → validateReceipt → GoodsReceiptDAO.createDraft → COMMIT. Tồn kho không đổi.",
+      title: "Lưu nháp thành công — phiếu bản nháp đã được ghi",
+      summary: "Máy chủ kiểm tra xong, ghi phiếu ở trạng thái bản nháp, rồi mở trang danh sách. Số thuốc trên kệ không tăng.",
       ran: true,
       actors: actorsOf("save"),
       messages: messages
@@ -468,9 +502,9 @@
     var actors = walk.actors || ACTORS;
     var n = actors.length;
     var W = 980;
-    var head = 62;
-    var rowH = 46;
-    var padX = 88;
+    var head = 68;
+    var rowH = 50;
+    var padX = 96;
     var msgs = walk.messages || [];
     var H = head + Math.max(msgs.length, 1) * rowH + 36;
     var xs = actors.map(function (_, i) {
@@ -483,8 +517,8 @@
         a.id +
         '">' +
         '<rect class="seq-box" x="' +
-        (xs[i] - 70) +
-        '" y="6" width="140" height="46" rx="8"/>' +
+        (xs[i] - 84) +
+        '" y="6" width="168" height="50" rx="8"/>' +
         '<text class="seq-box-t" x="' +
         xs[i] +
         '" y="24" text-anchor="middle">' +
@@ -492,12 +526,12 @@
         "</text>" +
         '<text class="seq-box-s" x="' +
         xs[i] +
-        '" y="42" text-anchor="middle">' +
+        '" y="44" text-anchor="middle">' +
         esc(a.sub) +
         "</text>" +
         '<line class="seq-life" x1="' +
         xs[i] +
-        '" y1="52" x2="' +
+        '" y1="56" x2="' +
         xs[i] +
         '" y2="' +
         (H - 8) +
@@ -512,7 +546,7 @@
         var x2 = xs[actorIndex(m.to)];
         var cls = "seq-msg is-future kind-" + m.kind + " st-" + m.status;
         var labelY = y - 8;
-        var label = esc(m.label.length > 64 ? m.label.slice(0, 62) + "…" : m.label);
+        var label = esc(m.label.length > 72 ? m.label.slice(0, 70) + "…" : m.label);
         if (m.from === m.to) {
           var x3 = x1 + 56;
           var d = "M " + x1 + " " + (y - 6) + " C " + x3 + " " + (y - 6) + ", " + x3 + " " + (y + 10) + ", " + x1 + " " + (y + 10);
@@ -589,7 +623,7 @@
   function captionHtml(walk, index) {
     var m = walk.messages[index];
     if (!m) {
-      return '<p class="be-cap-empty">Nhấn Phát để chạy luồng trên một diagram.</p>';
+      return '<p class="be-cap-empty">Bấm Phát để xem từng bước trên một hình. Bấm Hiện cả luồng để xem hết mũi tên cùng lúc.</p>';
     }
     var file = m.file
       ? ' <a class="sfe-doc-link" target="_blank" rel="noopener" href="' +
@@ -601,20 +635,21 @@
       : "";
     return (
       '<p class="be-cap-now">' +
-      '<span class="seq-chip">' +
+      '<span class="seq-chip">Bước ' +
       (index + 1) +
-      "/" +
+      " trên " +
       walk.messages.length +
-      "</span> " +
+      "</span> Từ <strong>" +
       esc(actorLabel(walk, m.from)) +
-      " → " +
+      "</strong> đến <strong>" +
       esc(actorLabel(walk, m.to)) +
-      " · " +
+      "</strong></p>" +
+      '<p class="be-cap-note"><strong>Đang làm gì:</strong> ' +
       esc(m.label) +
       file +
       "</p>" +
-      (m.note ? "<p class=\"be-cap-note\">" + esc(m.note) + "</p>" : "") +
-      (m.sql ? '<pre class="wiz-code be-sql">' + esc(m.sql) + "</pre>" : "")
+      (m.note ? "<p class=\"be-cap-note\"><strong>Giải thích:</strong> " + esc(m.note) + "</p>" : "") +
+      (m.sql ? '<p class="be-cap-note"><strong>Câu lệnh ghi hoặc đọc dữ liệu:</strong></p><pre class="wiz-code be-sql">' + esc(m.sql) + "</pre>" : "")
     );
   }
 
@@ -689,7 +724,7 @@
   function htmlShell(walk) {
     return (
       '<div class="be-head">' +
-      "<div><p class=\"be-kicker\">Sequence diagram · mô phỏng source Java</p>" +
+      "<div><p class=\"be-kicker\">Sơ đồ luồng — từng mũi tên là một lần gọi giữa các phần của hệ thống</p>" +
       '<h2 class="be-title">' +
       esc(walk.title) +
       "</h2><p class=\"be-sum\">" +
@@ -699,10 +734,10 @@
       '<button type="button" class="sfe-btn primary" data-be-play>Phát</button>' +
       '<button type="button" class="sfe-btn" data-be-all">Hiện cả luồng</button>' +
       "</div></div>" +
-      '<p class="seq-legend">Mũi tên liền = gọi / HTTP · nét đứt = return · đỏ = lỗi · cột không sáng = chưa được gọi. Toàn bộ nằm trên một diagram.</p>' +
+      '<p class="seq-legend">Mũi tên liền nét là đang gọi hoặc đang gửi yêu cầu. Mũi tên nét đứt là trả kết quả về. Màu đỏ là lỗi. Cột không sáng nghĩa là phần đó chưa được gọi. Bốn cột trên một hình: trình duyệt, chương trình điều khiển (Servlet), chương trình đọc/ghi dữ liệu (DAO), cơ sở dữ liệu MySQL.</p>' +
       svgDiagram(walk) +
       '<div class="be-caption" data-be-cap></div>' +
-      '<p class="be-note">Không phải Tomcat thật. Method/SQL khớp Pharma_Flow.</p>'
+      '<p class="be-note">Đây là mô phỏng trên trình duyệt, không phải máy chủ Tomcat thật. Tên chương trình, tên hàm và câu lệnh SQL khớp mã nguồn Pharma_Flow.</p>'
     );
   }
 

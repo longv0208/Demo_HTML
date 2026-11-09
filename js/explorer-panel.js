@@ -90,8 +90,10 @@
         body +=
           '<p class="wiz-muted">HTTP Preview theo form hiện tại</p><pre class="wiz-code wiz-http">' +
           escapeHtml(http) +
-          "</pre><p>validateReceipt(false): " +
-          (draft.ok ? "OK — có thể createDraft" : escapeHtml(V.firstError(draft.errors))) +
+          "</pre><p>Máy chủ kiểm tra phiếu (hàm validateReceipt, chế độ lưu nháp): " +
+          (draft.ok
+            ? "Đạt. Có thể gọi hàm ghi phiếu bản nháp createDraft."
+            : "Chưa đạt. " + escapeHtml(V.firstError(draft.errors))) +
           "</p>";
       }
       if (act.traceReady) {

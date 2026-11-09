@@ -8,42 +8,42 @@
   var LAYERS = [
     {
       id: "browser",
-      label: "Browser / JSP",
-      hint: "HTML người dùng đang điền. JS trên JSP chạy trong trình duyệt."
+      label: "Trình duyệt",
+      hint: "Màn hình bạn đang điền. Trang được vẽ từ tệp JSP, rồi trình duyệt hiện thành HTML."
     },
     {
       id: "httpReq",
-      label: "HTTP Request",
-      hint: "GET hoặc POST rời khỏi trình duyệt."
+      label: "Gửi yêu cầu",
+      hint: "Trình duyệt gửi yêu cầu GET (tải trang) hoặc POST (gửi phiếu khi Lưu nháp) tới máy chủ."
     },
     {
       id: "servlet",
-      label: "Servlet",
-      hint: "GoodsReceiptServlet (/inventory/receipts) hoặc LocationServlet (/inventory/locations)."
+      label: "Chương trình Servlet",
+      hint: "GoodsReceiptServlet nhận phiếu nhập tại /inventory/receipts. LocationServlet nhận khu/kệ/ngăn tại /inventory/locations."
     },
     {
       id: "dao",
-      label: "DAO / JDBC",
-      hint: "PurchaseOrderDAO, LocationDAO, GoodsReceiptDAO."
+      label: "Chương trình đọc/ghi dữ liệu",
+      hint: "PurchaseOrderDAO đọc đơn đặt hàng. LocationDAO đọc kệ và ngăn. GoodsReceiptDAO ghi hoặc đọc phiếu nhập."
     },
     {
       id: "db",
-      label: "MySQL",
-      hint: "Chỉ đổi khi transaction commit."
+      label: "Cơ sở dữ liệu MySQL",
+      hint: "Dữ liệu chỉ đổi khi máy chủ xác nhận lưu vĩnh viễn (COMMIT). Đọc thì không đổi."
     },
     {
       id: "httpRes",
-      label: "HTTP Response",
-      hint: "forward JSP, JSON, hoặc 302 redirect rồi GET mới."
+      label: "Máy chủ trả kết quả",
+      hint: "Máy chủ trả lại trang HTML, dữ liệu JSON, hoặc lệnh chuyển sang trang khác."
     }
   ];
 
   var ST = {
     idle: "Chưa được gọi",
-    running: "Đang xử lý (bước mô phỏng)",
-    done: "Xử lý hoàn tất",
+    running: "Đang xử lý (mô phỏng)",
+    done: "Đã xong bước này",
     error: "Phát hiện lỗi",
-    na: "Không áp dụng"
+    na: "Không dùng trong thao tác này"
   };
 
   function liveVal(form, fieldId) {
@@ -148,27 +148,27 @@
   function arrowsFor(action) {
     var type = action && action.type;
     if (type === "po-change") {
-      return "Browser → GET ?action=new&po=… → GoodsReceiptServlet.handleNewForm → PurchaseOrderDAO → MySQL (đọc) → forward JSP → Browser";
+      return "Bạn đổi đơn đặt hàng. Trình duyệt gửi yêu cầu GET để tải lại form. GoodsReceiptServlet gọi handleNewForm, nhờ PurchaseOrderDAO đọc đơn còn nhận hàng từ MySQL, rồi trả lại trang form với sản phẩm mới. Chưa ghi phiếu.";
     }
     if (type === "zone") {
-      return "Browser → GET /inventory/locations?action=api-racks&zoneId= → LocationServlet → LocationDAO.findRacks → MySQL → JSON → Browser";
+      return "Bạn chọn khu. Trình duyệt hỏi danh sách kệ tại LocationServlet (không phải GoodsReceiptServlet). LocationDAO đọc các kệ đang hoạt động từ MySQL rồi trả danh sách về ô chọn Kệ.";
     }
     if (type === "rack") {
-      return "Browser → GET /inventory/locations?action=api-bins&rackId= → LocationServlet → LocationDAO.findBins → MySQL → JSON → Browser";
+      return "Bạn chọn kệ. Trình duyệt hỏi danh sách ngăn tại LocationServlet. LocationDAO đọc các ngăn đang hoạt động từ MySQL rồi trả danh sách về ô chọn Ngăn. Mã khu và mã kệ không được gửi khi Lưu nháp.";
     }
     if (type === "cancel") {
-      return "Browser → GET /inventory/receipts → handleList → GoodsReceiptDAO.findAll (đọc) → forward list.jsp → Browser. Không POST, không INSERT.";
+      return "Bạn bấm Hủy. Trình duyệt xin trang danh sách bằng GET, không gửi form. GoodsReceiptServlet gọi handleList, GoodsReceiptDAO chỉ đọc danh sách. Không tạo phiếu mới.";
     }
     if (type === "save-draft") {
       if (action.branch === "validation") {
-        return "Browser → POST create → handleCreate → validateReceipt(false) lỗi → forward form. DAO không chạy. DB không đổi.";
+        return "Bạn bấm Lưu nháp. Trình duyệt gửi toàn bộ form. GoodsReceiptServlet kiểm tra bằng validateReceipt và phát hiện lỗi, nên trả lại form. Chương trình ghi phiếu không chạy. Cơ sở dữ liệu không đổi.";
       }
       if (action.branch === "dbError") {
-        return "Browser → POST create → validate OK → createDraft SQLException → rollback → forward form. Không COMMIT.";
+        return "Dữ liệu đã hợp lệ nhưng hàm ghi phiếu createDraft gặp lỗi. Máy chủ hủy thay đổi (rollback) rồi trả lại form. Không có phiếu mới.";
       }
-      return "Browser → POST create → validateReceipt(false) → createDraft INSERT → COMMIT BAN_NHAP → 302 → GET list → JSP. Tồn kho không đổi.";
+      return "Bạn bấm Lưu nháp. Máy chủ kiểm tra xong, GoodsReceiptDAO.createDraft thêm phiếu bản nháp và các dòng hàng, rồi xác nhận lưu. Máy chủ chuyển bạn sang trang danh sách. Số thuốc trên kệ không tăng.";
     }
-    return "Chưa gửi đến server. Chỉ Browser đang giữ giá trị trên form.";
+    return "Bạn đang điền form trên trình duyệt. Chưa gửi đến máy chủ Java. GoodsReceiptServlet và LocationServlet chưa nhận yêu cầu nào.";
   }
 
   function requestText(action, form) {
@@ -228,67 +228,69 @@
 
     if (layerId === "browser") {
       base.file = "web/WEB-INF/views/admin/goods-receipt-form.jsp";
-      base.method = "DOM + JS trên JSP";
-      base.input = "Người dùng sửa field " + fieldId;
-      base.output = fieldId + " = " + String(val);
+      base.method = "Màn hình form (HTML và JavaScript trên trang JSP)";
+      base.input = "Bạn đang sửa ô " + fieldId;
+      base.output = "Giá trị hiện tại: " + fieldId + " = " + String(val);
       base.nextWhy = sent
-        ? "Hành động này tạo HTTP."
-        : "Giá trị mới chỉ nằm trong Browser cho đến khi đổi PO, chọn Zone/Rack, Lưu nháp hoặc Hủy.";
+        ? "Thao tác này đã gửi yêu cầu tới máy chủ."
+        : "Giá trị mới chỉ nằm trên trình duyệt cho đến khi bạn đổi đơn đặt hàng, chọn khu hoặc kệ, bấm Lưu nháp, hoặc bấm Hủy.";
       return base;
     }
 
     if (layerId === "httpReq") {
       base.file = "goods-receipt-form.jsp";
-      base.method = sent ? (type === "save-draft" ? "POST" : "GET") : "—";
-      base.input = sent ? "Giá trị form hiện tại" : "Không";
+      base.method = sent ? (type === "save-draft" ? "POST (gửi dữ liệu form)" : "GET (xin trang hoặc danh sách)") : "—";
+      base.input = sent ? "Giá trị đang có trên form" : "Không gửi gì";
       base.output = requestText(action, form);
-      base.nextWhy = sent ? "Container khớp @WebServlet." : "Không có packet HTTP.";
+      base.nextWhy = sent
+        ? "Máy chủ Tomcat khớp địa chỉ với chương trình Servlet được gắn @WebServlet."
+        : "Chưa có yêu cầu nào rời khỏi trình duyệt.";
       return base;
     }
 
     if (layerId === "servlet") {
       if (!sent) {
         base.file = "GoodsReceiptServlet.java";
-        base.method = "Chưa chạy readItemsForm() / handleCreate()";
-        base.input = "Chưa có request";
+        base.method = "Chưa chạy readItemsForm hay handleCreate";
+        base.input = "Chưa có yêu cầu";
         base.output = "Chưa chạy";
-        base.nextWhy = "Servlet chỉ chạy khi có HTTP.";
+        base.nextWhy = "Chương trình Servlet chỉ chạy khi trình duyệt gửi yêu cầu HTTP.";
         return base;
       }
       if (type === "po-change") {
         base.file = "GoodsReceiptServlet.java";
-        base.method = "doGet → handleNewForm";
-        base.input = "query po, receiptDate, invoiceNumber, note";
-        base.output = "forward FORM_JSP + receivableOrders + poItems";
-        base.nextWhy = "Cần DAO để nạp PO và dòng hàng.";
+        base.method = "doGet rồi handleNewForm";
+        base.input = "Mã đơn đặt hàng trên đường dẫn, kèm ngày nhận, hóa đơn, ghi chú";
+        base.output = "Trả lại trang form với danh sách đơn còn nhận hàng và sản phẩm của đơn vừa chọn";
+        base.nextWhy = "Cần chương trình đọc đơn đặt hàng (PurchaseOrderDAO) để nạp dữ liệu.";
         return base;
       }
       if (type === "zone" || type === "rack") {
         base.file = "LocationServlet.java";
-        base.method = type === "zone" ? "handleApiRacks" : "handleApiBins";
-        base.input = type === "zone" ? "zoneId" : "rackId";
-        base.output = "JSON array (rackId/rackCode hoặc binId/binCode)";
-        base.nextWhy = "DAO lọc HOAT_DONG.";
+        base.method = type === "zone" ? "handleApiRacks (tìm kệ theo khu)" : "handleApiBins (tìm ngăn theo kệ)";
+        base.input = type === "zone" ? "Mã khu" : "Mã kệ";
+        base.output = "Danh sách kệ hoặc ngăn dạng JSON để JavaScript đổ vào ô chọn";
+        base.nextWhy = "LocationDAO chỉ lấy mục đang hoạt động.";
         return base;
       }
       if (type === "cancel") {
         base.file = "GoodsReceiptServlet.java";
-        base.method = "doGet → handleList (default)";
-        base.input = "GET không body";
-        base.output = "forward goods-receipt-list.jsp";
-        base.nextWhy = "Không gọi createDraft.";
+        base.method = "doGet rồi handleList (mặc định khi không có action)";
+        base.input = "GET, không gửi nội dung form";
+        base.output = "Trả về trang danh sách phiếu nhập";
+        base.nextWhy = "Không gọi hàm ghi phiếu bản nháp createDraft.";
         return base;
       }
       base.file = "GoodsReceiptServlet.java";
-      base.method = "doPost → handleCreate → validateReceipt(false)";
-      base.input = "POST body (tên param không có [])";
+      base.method = "doPost rồi handleCreate rồi validateReceipt ở chế độ lưu nháp";
+      base.input = "Toàn bộ form gửi bằng POST (tên ô không có dấu ngoặc vuông)";
       if (action.branch === "validation") {
         base.status = "error";
-        base.output = "errors: " + V.firstError(draft.errors);
-        base.nextWhy = "repopulateForm + forward. DAO không gọi.";
+        base.output = "Kiểm tra chưa đạt: " + V.firstError(draft.errors);
+        base.nextWhy = "Máy chủ điền lại form và trả về cùng trang. Chương trình ghi dữ liệu không được gọi.";
       } else {
-        base.output = "errors rỗng → setStatus BAN_NHAP";
-        base.nextWhy = "Gọi GoodsReceiptDAO.createDraft.";
+        base.output = "Không còn lỗi. Gán trạng thái phiếu là bản nháp (BAN_NHAP).";
+        base.nextWhy = "Gọi GoodsReceiptDAO.createDraft để ghi phiếu vào cơ sở dữ liệu.";
       }
       return base;
     }
@@ -299,16 +301,16 @@
         base.method = "Chưa được gọi";
         base.input = "—";
         base.output = "—";
-        base.nextWhy = "Không có HTTP thì không có JDBC.";
+        base.nextWhy = "Chưa có yêu cầu HTTP thì chưa có câu lệnh đọc hoặc ghi cơ sở dữ liệu.";
         return base;
       }
       if (type === "po-change") {
         base.file = "PurchaseOrderDAO.java";
-        base.method = "findReceivable / findById / findItems";
+        base.method = "findReceivable, findById, findItems (chỉ đọc)";
         base.hasSql = true;
-        base.input = "purchaseOrderId=" + form.purchaseOrderId;
-        base.output = "PO + items (ordered/received/remaining) — SELECT";
-        base.nextWhy = "Servlet gắn attribute rồi forward.";
+        base.input = "Mã đơn đặt hàng = " + form.purchaseOrderId;
+        base.output = "Đơn đặt hàng và từng dòng hàng (số đặt, số đã nhận, số còn lại). Chỉ đọc, không sửa.";
+        base.nextWhy = "GoodsReceiptServlet gắn dữ liệu vào trang rồi trả form về trình duyệt.";
         return base;
       }
       if (type === "zone") {
@@ -329,30 +331,30 @@
       }
       if (type === "cancel") {
         base.file = "GoodsReceiptDAO.java";
-        base.method = "findAll (SELECT)";
+        base.method = "findAll (chỉ đọc danh sách)";
         base.hasSql = true;
         base.dbChanged = false;
-        base.input = "keyword/status filter";
-        base.output = "Danh sách phiếu — không INSERT";
+        base.input = "Bộ lọc từ khóa hoặc trạng thái, nếu có";
+        base.output = "Danh sách phiếu đang có. Không thêm phiếu mới.";
         return base;
       }
       if (action.branch === "validation") {
         base.method = "createDraft không được gọi";
         base.hasSql = false;
-        base.output = "Không";
-        base.nextWhy = "validateReceipt trả errors.";
+        base.output = "Không ghi gì";
+        base.nextWhy = "Hàm kiểm tra validateReceipt còn lỗi nên dừng trước khi ghi.";
         return base;
       }
       base.file = "GoodsReceiptDAO.java";
-      base.method = "createDraft";
+      base.method = "createDraft (ghi phiếu bản nháp)";
       base.hasSql = true;
-      base.input = "GoodsReceipt + items";
+      base.input = "Phiếu nhập và danh sách dòng hàng";
       if (action.branch === "dbError") {
         base.status = "error";
-        base.output = "SQLException → rollback → return -1";
+        base.output = "Ghi thất bại, hủy thay đổi, trả về -1";
         base.dbChanged = false;
       } else {
-        base.output = "receiptId [DEMO], batch_id=NULL";
+        base.output = "Mã phiếu mới (demo). Cột lô tồn kho trên dòng hàng để trống.";
         base.dbChanged = true;
       }
       return base;
@@ -361,57 +363,57 @@
     if (layerId === "db") {
       var nGr = (sim.goodsReceipts || []).length;
       if (!sent) {
-        base.output = "Chưa thay đổi. Phiếu demo đang có: " + nGr;
+        base.output = "Chưa thay đổi. Số phiếu demo đang có: " + nGr;
         return base;
       }
       if (type === "po-change" || type === "zone" || type === "rack" || type === "cancel") {
         base.hasSql = true;
         base.dbChanged = false;
-        base.output = "Chỉ SELECT. inventory / PO received không đổi.";
+        base.output = "Chỉ đọc. Số thuốc trên kệ và số lượng đã nhận trên đơn đặt hàng không đổi.";
         return base;
       }
       if (action.branch === "validation" || action.branch === "dbError") {
         base.dbChanged = false;
         base.output =
-          "Không COMMIT. goods_receipts không thêm phiếu. inventory_batches / inventory_batch_locations / purchase_order_items.received_quantity / inventory_movements: không đổi.";
+          "Không xác nhận lưu. Bảng phiếu nhập không thêm dòng. Số thuốc trên kệ, vị trí lô, số lượng đã nhận trên đơn đặt hàng, và sổ xuất-nhập kho đều không đổi.";
         return base;
       }
       base.hasSql = true;
       base.dbChanged = true;
       base.output =
-        "After: goods_receipts +1 BAN_NHAP; goods_receipt_items +" +
+        "Sau khi lưu: thêm 1 phiếu bản nháp vào bảng goods_receipts; thêm " +
         (form.items || []).length +
-        "; inventory_* không đổi; PO received không đổi; không có NHAP_KHO.";
+        " dòng hàng vào bảng goods_receipt_items. Số thuốc trên kệ không tăng. Số lượng đã nhận trên đơn đặt hàng không tăng. Không có dòng sổ nhập kho.";
       return base;
     }
 
     if (layerId === "httpRes") {
       if (!sent) {
-        base.output = "Không có response.";
+        base.output = "Máy chủ chưa trả gì vì chưa có yêu cầu.";
         return base;
       }
       if (type === "po-change") {
-        base.method = "forward FORM_JSP";
-        base.output = "HTML form với poItems mới (cùng URL GET).";
+        base.method = "Trả lại trang form";
+        base.output = "HTML form với sản phẩm của đơn vừa chọn, cùng địa chỉ GET, không chuyển trang.";
         return base;
       }
       if (type === "zone" || type === "rack") {
-        base.method = "application/json";
-        base.output = "JSON racks/bins → JS đổ <select>";
+        base.method = "Trả dữ liệu JSON";
+        base.output = "Danh sách kệ hoặc ngăn. JavaScript đổ vào ô chọn, không vẽ lại cả trang.";
         return base;
       }
       if (type === "cancel") {
-        base.method = "forward LIST_JSP";
-        base.output = "Danh sách. Không ?ok=created.";
+        base.method = "Trả về trang danh sách";
+        base.output = "Danh sách phiếu. Không có thông báo đã lưu nháp.";
         return base;
       }
       if (action.branch === "validation" || action.branch === "dbError") {
-        base.method = "forward FORM_JSP (không redirect)";
-        base.output = "Cùng request POST; attribute errors; URL có thể vẫn ?action=create.";
+        base.method = "Trả lại form, không chuyển trang";
+        base.output = "Cùng yêu cầu POST; trang hiện danh sách lỗi. Địa chỉ có thể vẫn là ?action=create.";
         return base;
       }
-      base.method = "302 sendRedirect rồi GET list";
-      base.output = "Location: /inventory/receipts?ok=created → handleList → «Đã lưu nháp phiếu nhập — chưa có gì vào kho.»";
+      base.method = "Chuyển trang rồi xin danh sách bằng GET";
+      base.output = "Trình duyệt mở /inventory/receipts?ok=created. handleList hiện thông báo: «Đã lưu nháp phiếu nhập — chưa có gì vào kho.»";
       return base;
     }
     return base;

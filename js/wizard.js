@@ -275,7 +275,7 @@
       return "<li><strong>" + escapeHtml(k) + ":</strong> " + escapeHtml(draft.errors[k]) + "</li>";
     });
     return (
-      '<div class="alert alert-error sfe-form-errors" role="alert"><p>Servlet forward form — validateReceipt(false). DAO chưa chạy. DB không đổi.</p><ul>' +
+      '<div class="alert alert-error sfe-form-errors" role="alert"><p>Máy chủ Java đã nhận phiếu nhưng dữ liệu chưa hợp lệ. Hàm kiểm tra tên validateReceipt. Vì chưa đạt, chương trình ghi phiếu (GoodsReceiptDAO.createDraft) không được gọi. Cơ sở dữ liệu không thêm phiếu mới. Form được trả lại để bạn sửa.</p><ul>' +
       bits.join("") +
       "</ul></div>"
     );
@@ -287,13 +287,12 @@
       '<div class="sfe-frame admin-layout"><div class="sfe-demo-banner">Mô phỏng GET /inventory/receipts — Hủy form tạo mới</div>' +
       '<div class="admin-main" style="padding:20px">' +
       '<div class="alert" style="background:#eff6ff;border:1px solid #93c5fd;padding:12px;border-radius:8px;margin-bottom:12px">' +
-      "<strong>Không có phiếu mới được tạo.</strong> Link Hủy trên form create là " +
-      "<code>GET /inventory/receipts</code> → handleList() — không phải POST cancel một GR đã có, không gọi createDraft." +
+      "<strong>Không có phiếu mới được tạo.</strong> Nút Hủy trên form tạo mới chỉ xin trang danh sách bằng GET tới <code>/inventory/receipts</code>. Chương trình GoodsReceiptServlet gọi handleList. Đây không phải thao tác hủy một phiếu đã lưu, và không gọi hàm ghi nháp createDraft." +
       "</div>" +
-      "<h2>Nhập kho</h2><p class=\"section-sub\">Danh sách phiếu (demo). Phiếu demo hiện có: " +
+      "<h2>Nhập kho</h2><p class=\"section-sub\">Danh sách phiếu (bài học). Số phiếu đang có: " +
       sim.goodsReceipts.length +
       ".</p>" +
-      '<p class="field-hint">Database demo không đổi vì thao tác này. Khác với Hủy phiếu BAN_NHAP (POST action=cancel) — ngoài phạm vi bài Lưu nháp.</p>' +
+      '<p class="field-hint">Cơ sở dữ liệu demo không đổi vì bạn chỉ quay về danh sách. Việc hủy một phiếu bản nháp đã lưu là thao tác khác, nằm ngoài bài Lưu nháp.</p>' +
       '<button type="button" class="btn btn-primary" id="backToForm">Quay lại form tạo phiếu</button>' +
       "</div></div>";
     document.getElementById("backToForm").addEventListener("click", function () {
@@ -311,9 +310,9 @@
       '<div class="admin-main" style="padding:20px">' +
       '<div class="alert alert-success" role="status">Đã lưu nháp phiếu nhập — chưa có gì vào kho.</div>' +
       "<h2>Nhập kho</h2>" +
-      "<p>Phiếu [DEMO] #" +
+      "<p>Phiếu học tập số " +
       receiptId +
-      " trạng thái BAN_NHAP. inventory_batches / locations / PO received / NHAP_KHO: không đổi.</p>" +
+      " đã được ghi ở trạng thái bản nháp (BAN_NHAP). Số thuốc trên kệ không tăng. Số lượng đã nhận trên đơn đặt hàng không tăng. Sổ xuất-nhập kho không có dòng mới.</p>" +
       "<p>Số phiếu demo: " +
       sim.goodsReceipts.length +
       " · số dòng items: " +
@@ -710,26 +709,26 @@
     if (branch === "success" && step.dbAfter) {
       dbAfter =
         "<div class=\"wiz-db\"><p><strong>Before → After [DEMO]</strong></p>" +
-        "<p>goods_receipts: " +
+        "<p>Bảng phiếu nhập: từ " +
         Math.max(0, sim.goodsReceipts.length - 1) +
-        " → " +
+        " phiếu thành " +
         sim.goodsReceipts.length +
-        " (BAN_NHAP)</p>" +
-        "<p>goods_receipt_items: +" +
+        " phiếu (trạng thái bản nháp).</p>" +
+        "<p>Bảng dòng hàng: thêm " +
         (formState().items || []).length +
-        " (batch_id=NULL)</p>" +
-        "<p>inventory_batches / inventory_batch_locations / purchase_order_items.received_quantity / inventory_movements NHAP_KHO: <strong>không đổi</strong></p></div>";
+        " dòng. Cột lô tồn kho để trống vì chưa tạo lô trên kệ.</p>" +
+        "<p>Số thuốc trên kệ, vị trí lô, số lượng đã nhận trên đơn đặt hàng, sổ xuất-nhập kho: <strong>không đổi</strong>.</p></div>";
     } else if (step.dbPreview || step.dbAfter) {
       dbAfter =
         '<div class="wiz-db"><p>Không COMMIT. Database demo không thêm phiếu.</p></div>';
     }
     var warn = "";
     if (branch === "dbError") {
-      warn = '<p class="wiz-warn">[DEMO SCENARIO] SQLException — createDraft return -1, rollback.</p>';
+      warn = '<p class="wiz-warn">Tình huống học: ghi phiếu thất bại. Hàm createDraft trả về -1 và hủy thay đổi. Không có phiếu mới.</p>';
     }
     if (branch === "validation") {
       warn =
-        '<p class="wiz-warn">Nhánh Success bị khóa vì validateReceipt đang lỗi. Đang chạy Validation Error với dữ liệu form thật.</p>';
+        '<p class="wiz-warn">Không thể xem nhánh thành công vì dữ liệu form hiện tại chưa hợp lệ. Đang xem nhánh máy chủ trả lỗi, với đúng dữ liệu bạn đang điền.</p>';
     }
     host.innerHTML =
       '<div class="wiz-save"><div class="wiz-save-bar"><strong>Trace Lưu nháp</strong>' +
@@ -819,13 +818,13 @@
           var mark =
             c.pass === true
               ? pending
-                ? "Sẽ pass"
-                : "Pass"
+                ? "Sẽ đạt khi gửi"
+                : "Đạt"
               : c.pass === false
                 ? pending
-                  ? "Sẽ fail"
-                  : "Fail"
-                : "Info";
+                  ? "Sẽ chưa đạt khi gửi"
+                  : "Chưa đạt"
+                : "Chỉ để biết";
           return (
             "<li class=\"wiz-check wiz-check--" +
             st +
@@ -835,7 +834,7 @@
             escapeHtml(c.label) +
             "</strong> — " +
             escapeHtml(c.message) +
-            (c.runsWhen ? ' <em class="wiz-muted">(' + escapeHtml(c.runsWhen) + ")</em>" : "") +
+            (c.runsWhen ? ' <em class="wiz-muted">' + escapeHtml(c.runsWhen) + "</em>" : "") +
             "</li>"
           );
         })
@@ -852,25 +851,35 @@
     var st = V.fieldStatus(formState(), fieldId, catalog);
     var reqLabel = req === true ? "Bắt buộc" : req === false ? "Không bắt buộc" : String(req || "");
     els.fieldCard.innerHTML =
-      '<p class="wiz-card-kicker">Field đang xem</p>' +
+      '<p class="wiz-card-kicker">Ô đang học trên form</p>' +
       "<h3>" +
       escapeHtml(f.label || fieldId) +
       "</h3>" +
-      '<p class="wiz-prose"><strong>Ý nghĩa.</strong> ' +
+      '<p class="wiz-prose"><strong>Ô này dùng để làm gì?</strong> ' +
       escapeHtml(f.business || "") +
       "</p>" +
-      '<p class="wiz-prose"><strong>Cách nhập.</strong> ' +
+      '<p class="wiz-prose"><strong>Bạn cần làm gì trên ô này?</strong> ' +
       escapeHtml(how) +
-      " · " +
-      escapeHtml(reqLabel) +
+      " " +
+      escapeHtml(
+        fieldId === "saveDraft"
+          ? "Nút này là cách gửi phiếu. Không phải ô điền."
+          : req === true
+            ? "Ô này bắt buộc: không được để trống."
+            : req === false
+              ? "Ô này không bắt buộc: có thể để trống."
+              : reqLabel
+                ? "Quy tắc bắt buộc: " + reqLabel + "."
+                : ""
+      ) +
       "</p>" +
-      '<p class="wiz-prose"><strong>Tồn kho khi lưu nháp?</strong> Không — createDraft không đụng inventory / PO received / NHAP_KHO.</p>' +
-      "<h4 class=\"wiz-h4\">Kết quả validation (dữ liệu hiện tại)</h4>" +
-      "<p class=\"wiz-muted\">Cấp 1 — Browser / Educational UX</p>" +
-      checksHtml(st.browser, "Không có rule HTML cho field này.") +
-      "<p class=\"wiz-muted\">Cấp 2 — Servlet khi POST Lưu nháp (chưa chạy trừ khi bạn bấm Lưu nháp)</p>" +
+      '<p class="wiz-prose"><strong>Bấm Lưu nháp có làm tăng số thuốc trên kệ không?</strong> Không. Bài học này chỉ mô phỏng nút Lưu nháp. Máy chủ chỉ ghi một phiếu ở trạng thái bản nháp. Số lượng thuốc trong kho, số lượng đã nhận trên đơn đặt hàng, và sổ xuất-nhập kho đều không đổi. Chỉ khi có người bấm Xác nhận sau này (bài học này không làm bước đó) thì tồn kho mới tăng.</p>' +
+      "<h4 class=\"wiz-h4\">Máy kiểm tra dữ liệu của bạn như thế nào?</h4>" +
+      "<p class=\"wiz-muted\">Bước 1 — Trình duyệt kiểm tra ngay khi bạn gõ. Dữ liệu vẫn nằm trên máy bạn, chưa gửi đến máy chủ Java.</p>" +
+      checksHtml(st.browser, "Ô này không có quy tắc kiểm tra ngay trên trình duyệt.") +
+      "<p class=\"wiz-muted\">Bước 2 — Máy chủ Java kiểm tra khi bạn bấm Lưu nháp. Chương trình nhận yêu cầu tên GoodsReceiptServlet, hàm kiểm tra tên validateReceipt. Nếu bạn chưa bấm Lưu nháp, các dòng dưới đây cho biết nếu gửi đi thì sẽ đạt hay chưa đạt — chưa phải máy chủ đã chạy thật.</p>" +
       checksHtml(st.servlet, "", (lesson.getAction() || {}).type !== "save-draft") +
-      "<p class=\"wiz-muted\">Cấp 3 — DAO lúc Xác nhận (không mô phỏng trong bài này)</p>" +
+      "<p class=\"wiz-muted\">Bước 3 — Chỉ khi Xác nhận nhập kho sau này. Bài học này không mô phỏng bước đó, nên các quy tắc dưới đây không được chạy.</p>" +
       checksHtml(st.daoConfirm, "") +
       '<button type="button" class="sfe-btn" id="toggleTech">' +
       (techOpen ? "Ẩn cách hệ thống xử lý" : "Xem cách hệ thống xử lý") +
@@ -878,9 +887,9 @@
       '<div id="techBlock" class="' +
       (techOpen ? "" : "is-hidden") +
       '">' +
-      '<p class="wiz-muted">Param: <code>' +
+      '<p class="wiz-muted">Tên ô khi gửi lên máy chủ: <code>' +
       escapeHtml(f.param || "") +
-      "</code> · " +
+      "</code>. Tệp chương trình: " +
       '<a class="sfe-doc-link" target="_blank" rel="noopener" href="' +
       lesson.GH +
       "src/java/controller/GoodsReceiptServlet.java" +
