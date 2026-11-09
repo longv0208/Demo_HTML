@@ -4,7 +4,9 @@ Website học Java Servlet/JSP MVC2 — luồng **Nhập kho / Lưu nháp**, đ�
 
 ## Chạy
 
-Mở `index.html` trong trình duyệt (không cần Tomcat/MySQL).
+Mở `index.html` rồi **Bắt đầu: chọn đơn đặt hàng** (`nhap-kho-form.html`).
+
+Wizard 4 bước: PO → header → dòng hàng → Lưu nháp (trace layer). Form giữ trong sessionStorage. Không cần Tomcat/MySQL.
 
 ## Kiểm tra nhanh
 

@@ -10,41 +10,40 @@
   <div class="sfe-landing sfe-landing--lab">
     <p class="sfe-kicker">PharmaFlow · Java Web MVC2</p>
     <h1>PharmaFlow Learning Lab</h1>
-    <p class="sfe-tagline">Nhấn một nút. Hiểu toàn bộ luồng Java Web phía sau.</p>
+    <p class="sfe-tagline">Điền từng field. Nhìn dữ liệu đi qua từng layer.</p>
     <p>
-      Khám phá cách một thao tác <strong>nhập kho</strong> đi qua HTTP Request, Servlet, DAO, Database
-      và trở về JSP — dựa trên source code thực tế của
+      Bài học <strong>Lưu nháp phiếu nhập</strong> hiện toàn bộ form JSP. Bấm từng ô hoặc <em>Field tiếp theo</em>
+      để xem nghiệp vụ, validate HTML vs Servlet, và sơ đồ layer. Dựa trên source
       <a class="sfe-doc-link" href="https://github.com/longv0208/Pharma_Flow" target="_blank" rel="noopener">Pharma_Flow</a>.
     </p>
 
-    <a class="sfe-cta" href="nhap-kho-form.html">Bắt đầu bài học: Lưu nháp phiếu nhập</a>
+    <a class="sfe-cta" href="nhap-kho-form.html">Bắt đầu: form Nhập kho (JSP đầy đủ)</a>
 
     <div class="sfe-landing-grid">
       <section>
-        <h2>Bạn sẽ học được gì?</h2>
-        <ul>
-          <li>Form JSP gửi GET/POST thế nào</li>
-          <li>Servlet mapping <code>/inventory/receipts</code></li>
-          <li><code>doPost</code> → <code>handleCreate</code> → validation</li>
-          <li>DAO <code>createDraft</code> + SQL INSERT nháp</li>
-          <li>Vì sao Lưu nháp <em>không</em> cộng tồn kho</li>
-          <li>Khác biệt <code>forward</code> và <code>sendRedirect</code> (PRG)</li>
-        </ul>
+        <h2>Cách học</h2>
+        <ol>
+          <li>Nhìn cả form như màn hình thật (PO, header, dòng hàng, Lưu nháp)</li>
+          <li>Highlight 1 field — panel phải giải thích đúng ô đó</li>
+          <li>Bấm layer để xem param / code của lớp đó</li>
+          <li>Lưu nháp: trace POST → validateReceipt → createDraft (kho chưa đổi)</li>
+        </ol>
       </section>
       <section>
-        <h2>Cách dùng trong 3 bước</h2>
-        <ol>
-          <li>Mở form demo — chỉnh PO / dòng hàng (dữ liệu [DEMO])</li>
-          <li>Click badge vàng hoặc chọn Action bên trái</li>
-          <li>Nhấn <strong>Lưu nháp</strong> / <strong>Bắt đầu mô phỏng</strong> để Trace từng bước</li>
-        </ol>
+        <h2>Layer dữ liệu</h2>
+        <ul>
+          <li>Màn hình / JSP</li>
+          <li>HTTP (GET đổi PO · POST lúc lưu)</li>
+          <li>Servlet đọc + validateReceipt</li>
+          <li>DAO createDraft — chỉ khi Lưu nháp</li>
+          <li>Bảng GR nháp — chưa cộng tồn</li>
+        </ul>
       </section>
     </div>
 
     <p class="sfe-landing-note">
-      Không cần Tomcat hay MySQL. Mọi số liệu là <strong>[DEMO]</strong> — không ghi database thật.
-      Đặc tả nghiệp vụ:
-      <a class="sfe-doc-link" href="docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md">docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md</a>
+      Không cần Tomcat/MySQL. Số liệu <strong>[DEMO]</strong>.
+      <a class="sfe-doc-link" href="docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md">Đặc tả nghiệp vụ</a>
     </p>
   </div>
 </body>
