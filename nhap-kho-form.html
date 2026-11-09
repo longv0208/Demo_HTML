@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Explorer — Nhập kho | Demo_HTML</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/explorer.css">
+</head>
+<body>
+<div class="sfe-app">
+  <header class="sfe-topbar">
+    <div class="sfe-logo">Servlet Flow <span>Explorer</span></div>
+    <div class="sfe-crumb">
+      <a class="sfe-crumb-link" href="index.html">Demo_HTML</a>
+      › Page Explorer › <strong>Nhập kho (create)</strong>
+    </div>
+    <div class="sfe-topbar-right">
+      <span class="sfe-chip ok">Code: ../Pharma_Flow</span>
+      <span class="sfe-chip">+ Nghiệp vụ</span>
+    </div>
+  </header>
+
+  <div class="sfe-body">
+    <aside class="sfe-left">
+      <div class="sfe-tabs" role="tablist">
+        <button type="button" id="sfeTabActions" class="active" role="tab">Actions</button>
+        <button type="button" id="sfeTabBiz" role="tab">Nghiệp vụ</button>
+      </div>
+
+      <div class="sfe-left-pane" id="sfeLeftActions">
+        <div class="sfe-panel-head">Actions trên trang</div>
+        <ul class="sfe-action-list" id="sfeActionList"></ul>
+        <div class="sfe-hint-bar">
+          Badge vàng trên UI · phân tích từ
+          <code>GoodsReceiptServlet</code> + <code>goods-receipt-form.jsp</code>
+          (folder <code>Pharma_Flow</code>).
+        </div>
+      </div>
+
+      <div class="sfe-left-pane" id="sfeLeftBiz" hidden>
+        <div class="sfe-panel-head">Chủ đề nghiệp vụ</div>
+        <div class="sfe-biz-topics" id="sfeBizTopicList"></div>
+      </div>
+    </aside>
+
+    <main class="sfe-center">
+      <div class="sfe-toolbar">
+        <span id="sfePageInfo">Đang tải…</span>
+        <span class="spacer"></span>
+        <button type="button" class="sfe-btn" id="sfeInspectorToggle">Panel phải</button>
+        <button type="button" class="sfe-btn primary" id="sfeTraceBtn" disabled>Trace Flow</button>
+      </div>
+
+      <div class="sfe-viewport">
+        <div class="sfe-frame admin-layout">
+          <div class="sfe-demo-banner">
+            HTML mô phỏng JSP gốc · PO/sản phẩm [DEMO] · không gọi server · nghiệp vụ theo đặc tả nhập kho
+          </div>
+
+          <header class="admin-topbar">
+            <a class="brand" href="#" onclick="return false;">
+              <span class="brand-mark">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="3" y="8" width="18" height="13" rx="2"/>
+                  <path d="M8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/>
+                  <path d="M12 12v6M9 15h6"/>
+                </svg>
+              </span>
+              <span class="brand-name">PharmaFlow</span>
+              <span class="brand-tag">Quản trị</span>
+            </a>
+            <div class="admin-topbar-actions">
+              <span class="icon-btn"><span class="icon-label">Demo User</span></span>
+            </div>
+          </header>
+
+          <div class="admin-shell">
+            <aside class="admin-sidebar">
+              <nav class="admin-nav" aria-label="Mục quản trị">
+                <span class="admin-nav-label">Kho</span>
+                <a class="admin-nav-link" href="#" onclick="return false;">Tồn kho</a>
+                <a class="admin-nav-link" href="#" onclick="return false;">Vị trí kho</a>
+                <a class="admin-nav-link current" href="#" onclick="return false;">Nhập kho</a>
+                <a class="admin-nav-link" href="#" onclick="return false;">Điều chỉnh kho</a>
+              </nav>
+            </aside>
+
+            <div class="admin-main">
+              <nav class="crumbs" aria-label="Breadcrumb">
+                <a href="#" onclick="return false;">Kho hàng</a>
+                <span aria-hidden="true"> › </span>
+                <span>Nhập kho</span>
+              </nav>
+
+              <div class="section-head">
+                <div>
+                  <h2>Nhập kho</h2>
+                  <p class="section-sub">Ghi nhận thuốc mới nhận từ nhà cung cấp theo đơn đặt hàng.</p>
+                </div>
+              </div>
+
+              <div class="profile-card">
+                <form class="profile-form" method="post" id="grForm"
+                      action="/Pharma_Flow/inventory/receipts?action=create"
+                      data-reload-url="/Pharma_Flow/inventory/receipts?action=new">
+
+                  <fieldset class="profile-group">
+                    <legend>Thông tin phiếu nhập</legend>
+                    <div class="profile-grid">
+                      <div class="form-field">
+                        <label for="purchaseOrderId">Đơn đặt hàng <span class="req">*</span></label>
+                        <div class="sfe-hotspot" data-action-id="po-change">
+                          <span class="sfe-hotspot-mark">1</span>
+                          <select id="purchaseOrderId" name="purchaseOrderId" required>
+                            <option value="">— Chọn đơn đặt hàng —</option>
+                            <option value="12" selected>#12 — Công ty Dược ABC (2026-11-01)</option>
+                            <option value="15">#15 — MedSupply XYZ (2026-11-05)</option>
+                          </select>
+                        </div>
+                        <span class="field-hint">Chỉ các đơn đã đặt hoặc nhận một phần mới được hiển thị.</span>
+                      </div>
+
+                      <div class="form-field">
+                        <label for="supplierName">Nhà cung cấp</label>
+                        <input type="text" id="supplierName" readonly value="Công ty Dược ABC"
+                               placeholder="— tự động điền từ đơn đặt hàng —">
+                      </div>
+
+                      <div class="form-field">
+                        <label for="receiptDate">Ngày nhận <span class="req">*</span></label>
+                        <input type="date" id="receiptDate" name="receiptDate" required value="2026-11-09">
+                      </div>
+
+                      <div class="form-field">
+                        <label for="invoiceNumber">Số hóa đơn</label>
+                        <input type="text" id="invoiceNumber" name="invoiceNumber" maxlength="100"
+                               value="HD-DEMO-001" placeholder="Tham chiếu hóa đơn nhà cung cấp">
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label for="note">Ghi chú</label>
+                      <textarea id="note" name="note" rows="2" maxlength="500"
+                                placeholder="Ghi chú tùy chọn cho phiếu nhập này">[DEMO] Phiếu nhập thử — Flow Explorer</textarea>
+                    </div>
+                  </fieldset>
+
+                  <fieldset class="profile-group">
+                    <legend>Sản phẩm nhận được</legend>
+                    <table class="admin-table gr-items-table">
+                      <thead>
+                      <tr>
+                        <th style="width:26%">Sản phẩm</th>
+                        <th style="width:13%">Số lô</th>
+                        <th style="width:11%">Hạn dùng</th>
+                        <th style="width:8%">SL</th>
+                        <th style="width:11%">Giá nhập</th>
+                        <th style="width:16%">Vị trí (Chấp nhận)</th>
+                        <th style="width:11%">Kiểm tra</th>
+                        <th style="width:14%">Lý do từ chối</th>
+                        <th style="width:6%"></th>
+                      </tr>
+                      </thead>
+                      <tbody id="itemsBody">
+                      <tr class="gr-item-row">
+                        <td>
+                          <select name="poItemId" class="gr-product" required>
+                            <option value="">— Sản phẩm —</option>
+                            <option value="101" selected
+                                    data-product-id="55"
+                                    data-ordered="100"
+                                    data-received="20"
+                                    data-remaining="80"
+                                    data-cost="15000">Paracetamol 500mg (PARA500)</option>
+                            <option value="102"
+                                    data-product-id="56"
+                                    data-ordered="50"
+                                    data-received="0"
+                                    data-remaining="50"
+                                    data-cost="22000">Vitamin C 1000mg (VITC1K)</option>
+                          </select>
+                          <span class="gr-remaining field-hint">Đã đặt: 100 | Đã nhận: 20 | Còn lại: 80</span>
+                        </td>
+                        <td><input type="text" name="batchNumber" class="gr-batch" maxlength="100" value="LOT-A01" required></td>
+                        <td><input type="date" name="expiryDate" class="gr-expiry" value="2027-06-30" required></td>
+                        <td><input type="number" name="quantity" class="gr-qty" min="1" step="1" value="40" required></td>
+                        <td><input type="number" name="costPrice" class="gr-cost" min="0" step="1" value="15000" required></td>
+                        <td class="gr-loc-cell">
+                          <select class="gr-zone">
+                            <option value="">Khu</option>
+                            <option value="1" selected>A</option>
+                            <option value="2">B</option>
+                          </select>
+                          <select class="gr-rack">
+                            <option value="">Kệ</option>
+                            <option value="11" selected>A-01</option>
+                          </select>
+                          <select name="binId" class="gr-bin">
+                            <option value="">Ngăn</option>
+                            <option value="111" selected>A-01-01</option>
+                          </select>
+                        </td>
+                        <td>
+                          <select name="inspectionResult" class="gr-inspection">
+                            <option value="CHO_KIEM_TRA" selected>Chờ kiểm tra</option>
+                            <option value="CHAP_NHAN">Chấp nhận</option>
+                            <option value="TU_CHOI">Từ chối</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input type="text" name="rejectionReason" class="gr-reason" maxlength="500"
+                                 placeholder="VD: Hết hạn, Vỡ hộp" hidden>
+                        </td>
+                        <td><button type="button" class="btn btn-ghost btn-sm btn-danger gr-remove">Xóa</button></td>
+                      </tr>
+                      </tbody>
+                    </table>
+
+                    <div>
+                      <span class="sfe-hotspot sfe-hotspot--inline" data-action-id="add-item">
+                        <span class="sfe-hotspot-mark">2</span>
+                        <button type="button" class="btn btn-secondary btn-sm" id="addItemBtn">+ Thêm sản phẩm</button>
+                      </span>
+                      <span class="field-hint">Một sản phẩm trong đơn có thể nhận nhiều lô — thêm dòng khác cho cùng sản phẩm.</span>
+                    </div>
+                  </fieldset>
+
+                  <div class="gr-summary" id="grSummary">
+                    <span>0 dòng chấp nhận (0 đơn vị sẽ vào kho)</span>
+                    <span>0 dòng từ chối (0 đơn vị loại ra)</span>
+                    <span>Giá trị chấp nhận: 0 VND</span>
+                  </div>
+
+                  <div class="profile-actions">
+                    <span class="sfe-hotspot sfe-hotspot--inline" data-action-id="cancel-link">
+                      <span class="sfe-hotspot-mark">3</span>
+                      <a class="btn btn-ghost" href="/Pharma_Flow/inventory/receipts" onclick="return false;">Hủy</a>
+                    </span>
+                    <span class="sfe-hotspot sfe-hotspot--inline" data-action-id="save-draft">
+                      <span class="sfe-hotspot-mark">4</span>
+                      <button type="submit" name="submitAction" value="draft" class="btn btn-secondary">Lưu nháp</button>
+                    </span>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="sfe-right">
+      <div class="sfe-panel-head" id="sfeRightHead">Action Inspector</div>
+      <div class="sfe-inspector" id="sfeInspector"></div>
+      <div class="sfe-inspector" id="sfeBizPanel" hidden></div>
+      <div class="sfe-hint-bar">
+        Màu:
+        <span class="sfe-legend-http">HTTP</span> ·
+        <span class="sfe-legend-ctrl">Controller</span> ·
+        <span class="sfe-legend-dao">DAO</span> ·
+        <span class="sfe-legend-ok">Nghiệp vụ</span>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<template id="grRowTemplate">
+  <tr class="gr-item-row">
+    <td>
+      <select name="poItemId" class="gr-product" required>
+        <option value="">— Sản phẩm —</option>
+        <option value="101" data-product-id="55" data-ordered="100" data-received="20" data-remaining="80" data-cost="15000">Paracetamol 500mg (PARA500)</option>
+        <option value="102" data-product-id="56" data-ordered="50" data-received="0" data-remaining="50" data-cost="22000">Vitamin C 1000mg (VITC1K)</option>
+      </select>
+      <span class="gr-remaining field-hint"></span>
+    </td>
+    <td><input type="text" name="batchNumber" class="gr-batch" maxlength="100" required></td>
+    <td><input type="date" name="expiryDate" class="gr-expiry" required></td>
+    <td><input type="number" name="quantity" class="gr-qty" min="1" step="1" required></td>
+    <td><input type="number" name="costPrice" class="gr-cost" min="0" step="1" required></td>
+    <td class="gr-loc-cell">
+      <select class="gr-zone"><option value="">Khu</option><option value="1">A</option><option value="2">B</option></select>
+      <select class="gr-rack"><option value="">Kệ</option></select>
+      <select name="binId" class="gr-bin"><option value="">Ngăn</option></select>
+    </td>
+    <td>
+      <select name="inspectionResult" class="gr-inspection">
+        <option value="CHO_KIEM_TRA">Chờ kiểm tra</option>
+        <option value="CHAP_NHAN">Chấp nhận</option>
+        <option value="TU_CHOI">Từ chối</option>
+      </select>
+    </td>
+    <td><input type="text" name="rejectionReason" class="gr-reason" maxlength="500" placeholder="VD: Hết hạn, Vỡ hộp" hidden></td>
+    <td><button type="button" class="btn btn-ghost btn-sm btn-danger gr-remove">Xóa</button></td>
+  </tr>
+</template>
+
+<script src="data/nhap-kho-form-actions.js"></script>
+<script src="data/nhap-kho-nghiep-vu.js"></script>
+<script src="js/page-explorer.js"></script>
+</body>
+</html>
