@@ -19,7 +19,7 @@
     {
       id: "servlet",
       label: "Servlet",
-      hint: "GoodsReceiptServlet hoặc LocationServlet."
+      hint: "GoodsReceiptServlet (/inventory/receipts) hoặc LocationServlet (/inventory/locations)."
     },
     {
       id: "dao",

@@ -13,8 +13,8 @@
     <p class="sfe-tagline">Điền từng field. Nhìn dữ liệu đi qua từng layer.</p>
     <p>
       Bài học <strong>Lưu nháp phiếu nhập</strong>: điền form JSP thật, xem field đang sửa,
-      validation Browser vs Servlet, và data flow chỉ khi có GET/POST.
-      Layer không sáng nếu bạn chỉ gõ ô. Dựa trên
+      validation Browser vs Servlet, và <strong>call stack Java</strong> (doGet/doPost, validateReceipt, createDraft, SQL)
+      chỉ khi có GET/POST. Layer không sáng nếu bạn chỉ gõ ô. Dựa trên
       <a class="sfe-doc-link" href="https://github.com/longv0208/Pharma_Flow" target="_blank" rel="noopener">Pharma_Flow</a>.
     </p>
 
@@ -28,6 +28,7 @@
           <li>Highlight 1 field — panel phải giải thích đúng ô đó</li>
           <li>Bấm layer để xem param / code của lớp đó</li>
           <li>Lưu nháp: trace POST → validateReceipt → createDraft (kho chưa đổi)</li>
+          <li>Kéo xuống <strong>sequence diagram</strong>: mũi tên chạy Browser → Servlet → DAO → MySQL trên một khung</li>
         </ol>
       </section>
       <section>

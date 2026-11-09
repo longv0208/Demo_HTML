@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Form nhập kho — PharmaFlow Learning Lab</title>
   <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/explorer.css">
+  <link rel="stylesheet" href="css/explorer.css?v=seq2">
 </head>
 <body class="wiz-page">
   <header class="sfe-topbar">
@@ -64,6 +64,8 @@
 
       <aside class="wiz-side is-hidden" id="explorerSide"></aside>
     </div>
+
+    <section class="be-stage" id="wizBackend" aria-label="Sequence diagram luồng Java"></section>
   </div>
 
   <div id="sfeModal" class="sfe-modal is-hidden" role="dialog" aria-modal="true">
@@ -83,8 +85,9 @@
   <script src="data/nhap-kho-nghiep-vu.js"></script>
   <script src="js/lesson-state.js"></script>
   <script src="js/validate-receipt.js"></script>
-  <script src="js/data-flow.js"></script>
+  <script src="js/data-flow.js?v=seq2"></script>
+  <script src="js/backend-viz.js?v=seq2"></script>
   <script src="js/explorer-panel.js"></script>
-  <script src="js/wizard.js"></script>
+  <script src="js/wizard.js?v=seq2"></script>
 </body>
 </html>

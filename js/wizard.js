@@ -43,7 +43,8 @@
     modal: document.getElementById("sfeModal"),
     modalText: document.getElementById("sfeModalText"),
     modalOk: document.getElementById("sfeModalOk"),
-    modalCancel: document.getElementById("sfeModalCancel")
+    modalCancel: document.getElementById("sfeModalCancel"),
+    backend: document.getElementById("wizBackend")
   };
 
   function escapeHtml(s) {
@@ -461,7 +462,7 @@
         ]
       : [];
     lesson.persist();
-    lesson.setAction({ type: "po-change", fieldId: "purchaseOrderId" });
+    lesson.setAction({ type: "po-change", fieldId: "purchaseOrderId", seq: Date.now() });
     renderFullForm();
     refreshChrome();
   }
@@ -502,7 +503,7 @@
         rack.innerHTML = locOptions(catalog.locations.racksByZone[e.target.value] || [], "Kệ", "");
         bin2.innerHTML = locOptions([], "Ngăn", "");
         persistFormFromDom();
-        lesson.setAction({ type: "zone", fieldId: "zoneRack" });
+        lesson.setAction({ type: "zone", fieldId: "zoneRack", seq: Date.now() });
         refreshChrome();
         return;
       }
@@ -513,7 +514,7 @@
           ""
         );
         persistFormFromDom();
-        lesson.setAction({ type: "rack", fieldId: "binId" });
+        lesson.setAction({ type: "rack", fieldId: "binId", seq: Date.now() });
         refreshChrome();
         return;
       }
@@ -599,7 +600,10 @@
       }
     }
     var target = els.form.querySelector('[data-field="' + id + '"]');
-    if (target && target.scrollIntoView) target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    var actType = (lesson.getAction() || {}).type;
+    if (target && target.scrollIntoView && actType !== "save-draft" && actType !== "po-change" && actType !== "zone" && actType !== "rack" && actType !== "cancel") {
+      target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
   }
 
   function goField(i, fromFocus) {
@@ -640,7 +644,7 @@
     ask(
       "Rời form tạo phiếu? Dữ liệu chưa Lưu nháp sẽ mất. Không tạo Goods Receipt mới (GET danh sách, không POST).",
       function () {
-        lesson.setAction({ type: "cancel", fieldId: "saveDraft" });
+        lesson.setAction({ type: "cancel", fieldId: "saveDraft", seq: Date.now() });
         lesson.setResult({ kind: "cancelled" });
         renderCancelled();
         refreshChrome();
@@ -650,7 +654,7 @@
 
   function startSaveDraft() {
     persistFormFromDom();
-    goField(tour.indexOf("saveDraft"), false);
+    lesson.setTourIndex(Math.max(0, tour.indexOf("saveDraft")));
     var draft = V.servletValidate(formState(), catalog, false);
     var scenario = lesson.getScenario();
     var branch = "success";
@@ -665,12 +669,15 @@
     }
     lesson.setTraceBranch(branch);
     lesson.setTraceIndex(0);
-    lesson.setAction({ type: "save-draft", fieldId: "saveDraft", branch: branch });
+    lesson.setAction({ type: "save-draft", fieldId: "saveDraft", branch: branch, seq: Date.now() });
     if (branch === "success") {
       lesson.applyDraftSuccess(formState());
     }
     renderFullForm();
     refreshChrome();
+    if (els.backend && els.backend.scrollIntoView) {
+      els.backend.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
   }
 
   function filteredTrace() {
@@ -767,10 +774,10 @@
         var draft = V.servletValidate(formState(), catalog, false);
         if (next === "success" && !draft.ok) {
           lesson.setTraceBranch("validation");
-          lesson.setAction({ type: "save-draft", fieldId: "saveDraft", branch: "validation" });
+          lesson.setAction({ type: "save-draft", fieldId: "saveDraft", branch: "validation", seq: Date.now() });
         } else {
           lesson.setTraceBranch(next);
-          lesson.setAction({ type: "save-draft", fieldId: "saveDraft", branch: next });
+          lesson.setAction({ type: "save-draft", fieldId: "saveDraft", branch: next, seq: Date.now() });
         }
         lesson.setTraceIndex(0);
         renderTrace();
@@ -916,6 +923,7 @@
         techOpen = true;
         renderLayers();
         renderLayerDetail();
+        renderBackend({ selectedLayer: selectedLayerId });
       });
     });
     renderLayerDetail();
@@ -967,6 +975,17 @@
       "<dt>Tiếp theo</dt><dd>" +
       escapeHtml(d.nextWhy || "") +
       "</dd></dl>";
+  }
+
+  function renderBackend(opts) {
+    if (!window.SFE_BACKEND || !els.backend) return;
+    window.SFE_BACKEND.mount(els.backend, {
+      action: lesson.getAction() || { type: "idle", fieldId: currentFieldId() },
+      form: formState(),
+      catalog: catalog,
+      sim: lesson.getSim(),
+      selectedLayer: opts && opts.selectedLayer
+    });
   }
 
   function renderStepper() {
@@ -1048,6 +1067,7 @@
     renderProgress();
     renderFieldCard();
     renderLayers();
+    renderBackend();
     renderTrace();
     applyMode();
     highlightField(currentFieldId());

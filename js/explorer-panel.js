@@ -98,7 +98,7 @@
         body +=
           '<p><button type="button" class="sfe-btn primary" id="exTrace">Mở Trace Lưu nháp</button></p>';
       }
-    } else {
+    } else if (tab === "biz") {
       var phase = phases.filter(function (p) {
         return p.id === bizId;
       })[0] || phases[0] || {};
@@ -115,6 +115,16 @@
         (biz && biz.oneLiner ? "<p class=\"wiz-prose\">" + escapeHtml(biz.oneLiner) + "</p>" : "");
     }
 
+    if (tab === "backend") {
+      body =
+        "<h3>Backend Java</h3>" +
+        '<p class="wiz-prose">Sequence diagram dưới form animate Browser → Servlet → DAO → MySQL trên một khung. Không chạy Tomcat — mô phỏng source ' +
+        '<a class="sfe-doc-link" target="_blank" rel="noopener" href="' +
+        (lesson.GH || "") +
+        'src/java/controller/GoodsReceiptServlet.java">GoodsReceiptServlet.java</a>.</p>' +
+        '<p><button type="button" class="sfe-btn primary" id="exJumpBe">Nhảy tới sequence diagram</button></p>';
+    }
+
     root.innerHTML =
       '<div class="wiz-panel"><div class="wiz-nav" style="margin-bottom:8px">' +
       '<button type="button" class="sfe-btn' +
@@ -122,8 +132,12 @@
       '" data-tab="actions">Actions</button>' +
       '<button type="button" class="sfe-btn' +
       (tab === "biz" ? " primary" : "") +
-      '" data-tab="biz">Nghiệp vụ</button></div>' +
-      (tab === "actions" ? '<div class="wiz-stepper">' + actionList + "</div>" : '<div class="wiz-stepper">' + phaseList + "</div>") +
+      '" data-tab="biz">Nghiệp vụ</button>' +
+      '<button type="button" class="sfe-btn' +
+      (tab === "backend" ? " primary" : "") +
+      '" data-tab="backend">Backend Java</button></div>' +
+      (tab === "actions" ? '<div class="wiz-stepper">' + actionList + "</div>" : "") +
+      (tab === "biz" ? '<div class="wiz-stepper">' + phaseList + "</div>" : "") +
       body +
       "</div>";
 
@@ -156,6 +170,12 @@
           document.getElementById("saveDraftBtn") &&
             document.getElementById("saveDraftBtn").click();
         }
+      });
+    var jump = document.getElementById("exJumpBe");
+    if (jump)
+      jump.addEventListener("click", function () {
+        var el = document.getElementById("wizBackend");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       });
   }
 
