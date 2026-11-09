@@ -38,7 +38,7 @@
         </div>
       </div>
 
-      <div class="sfe-left-pane" id="sfeLeftBiz" hidden>
+      <div class="sfe-left-pane is-hidden" id="sfeLeftBiz" hidden>
         <div class="sfe-panel-head">Chủ đề nghiệp vụ</div>
         <div class="sfe-biz-topics" id="sfeBizTopicList"></div>
       </div>
@@ -48,8 +48,11 @@
       <div class="sfe-toolbar">
         <span id="sfePageInfo">Đang tải…</span>
         <span class="spacer"></span>
+        <button type="button" class="sfe-btn" id="sfeShowGuide">Hướng dẫn</button>
+        <button type="button" class="sfe-btn" id="sfeResetDemo">Reset demo</button>
         <button type="button" class="sfe-btn" id="sfeInspectorToggle">Panel phải</button>
-        <button type="button" class="sfe-btn primary" id="sfeTraceBtn" disabled>Trace Flow</button>
+        <button type="button" class="sfe-btn primary" id="sfeStartTrace">Bắt đầu mô phỏng</button>
+        <button type="button" class="sfe-btn primary" id="sfeTraceBtn">Trace Flow</button>
       </div>
 
       <div class="sfe-viewport">
@@ -148,18 +151,19 @@
 
                   <fieldset class="profile-group">
                     <legend>Sản phẩm nhận được</legend>
+                    <div class="gr-items-wrap">
                     <table class="admin-table gr-items-table">
                       <thead>
                       <tr>
-                        <th style="width:26%">Sản phẩm</th>
-                        <th style="width:13%">Số lô</th>
-                        <th style="width:11%">Hạn dùng</th>
-                        <th style="width:8%">SL</th>
-                        <th style="width:11%">Giá nhập</th>
-                        <th style="width:16%">Vị trí (Chấp nhận)</th>
-                        <th style="width:11%">Kiểm tra</th>
-                        <th style="width:14%">Lý do từ chối</th>
-                        <th style="width:6%"></th>
+                        <th class="col-product">Sản phẩm</th>
+                        <th class="col-batch">Số lô</th>
+                        <th class="col-expiry">Hạn dùng</th>
+                        <th class="col-qty">SL</th>
+                        <th class="col-cost">Giá nhập</th>
+                        <th class="col-loc">Vị trí</th>
+                        <th class="col-insp">Kiểm tra</th>
+                        <th class="col-reason">Lý do từ chối</th>
+                        <th class="col-act"></th>
                       </tr>
                       </thead>
                       <tbody id="itemsBody">
@@ -216,13 +220,15 @@
                       </tr>
                       </tbody>
                     </table>
+                    </div>
 
                     <div>
                       <span class="sfe-hotspot sfe-hotspot--inline" data-action-id="add-item">
                         <span class="sfe-hotspot-mark">2</span>
                         <button type="button" class="btn btn-secondary btn-sm" id="addItemBtn">+ Thêm sản phẩm</button>
                       </span>
-                      <span class="field-hint">Một sản phẩm trong đơn có thể nhận nhiều lô — thêm dòng khác cho cùng sản phẩm.</span>
+                      <span class="field-hint" id="noPoHint" hidden>Chọn đơn đặt hàng trước — sản phẩm sẽ được tải ở đây.</span>
+                      <span class="field-hint">Một sản phẩm có thể nhận nhiều lô — thêm dòng khác cho cùng sản phẩm.</span>
                     </div>
                   </fieldset>
 
@@ -253,7 +259,7 @@
     <aside class="sfe-right">
       <div class="sfe-panel-head" id="sfeRightHead">Action Inspector</div>
       <div class="sfe-inspector" id="sfeInspector"></div>
-      <div class="sfe-inspector" id="sfeBizPanel" hidden></div>
+      <div class="sfe-inspector is-hidden" id="sfeBizPanel" hidden></div>
       <div class="sfe-hint-bar">
         Màu:
         <span class="sfe-legend-http">HTTP</span> ·
@@ -296,8 +302,67 @@
   </tr>
 </template>
 
+<!-- Onboarding -->
+<div class="sfe-onboard" id="sfeOnboard" hidden>
+  <div class="sfe-onboard-card">
+    <h3>Chào mừng — 3 vùng làm việc</h3>
+    <ol>
+      <li><strong>Trái:</strong> danh sách Actions / tab Nghiệp vụ</li>
+      <li><strong>Giữa:</strong> giao diện Nhập kho (giống JSP). Badge vàng = điểm có thể phân tích</li>
+      <li><strong>Phải:</strong> giải thích HTTP → Servlet → DAO</li>
+    </ol>
+    <p>Mặc định đã chọn <strong>Lưu nháp</strong>. Nhấn <em>Bắt đầu mô phỏng</em> hoặc submit nút Lưu nháp để xem từng bước — <strong>không ghi database thật</strong>.</p>
+    <p class="sfe-onboard-terms">GET/POST = cách gửi request · Servlet = class Java nhận URL · DAO = lớp gọi SQL · JSP = trang render HTML.</p>
+    <button type="button" class="sfe-btn primary" id="sfeOnboardSkip">Đã hiểu — bắt đầu</button>
+  </div>
+</div>
+
+<!-- Trace modal -->
+<div class="sfe-trace-modal" id="sfeTraceModal" hidden>
+  <div class="sfe-trace-dialog">
+    <header class="sfe-trace-head">
+      <div>
+        <strong>Trace Flow — Lưu nháp</strong>
+        <div class="sfe-insp-sub" id="sfeTraceMeta">—</div>
+      </div>
+      <button type="button" class="sfe-btn" id="sfeTraceClose">Đóng</button>
+    </header>
+    <div class="sfe-trace-toolbar">
+      <label class="sfe-trace-branch"><input type="radio" name="sfeTraceBranch" value="success" checked> Success</label>
+      <label class="sfe-trace-branch"><input type="radio" name="sfeTraceBranch" value="validation"> Validation Error</label>
+      <label class="sfe-trace-branch"><input type="radio" name="sfeTraceBranch" value="dbError"> Database Error</label>
+      <span id="sfeTraceValWrap" hidden>
+        <select id="sfeTraceValScenario"></select>
+      </span>
+      <span class="spacer"></span>
+      <label>Tốc độ
+        <select id="sfeTraceSpeed">
+          <option value="2200">Chậm</option>
+          <option value="1400" selected>Vừa</option>
+          <option value="700">Nhanh</option>
+        </select>
+      </label>
+      <button type="button" class="sfe-btn" id="sfeTracePrev">Previous</button>
+      <button type="button" class="sfe-btn primary" id="sfeTracePlay">Play</button>
+      <button type="button" class="sfe-btn" id="sfeTraceNext">Next</button>
+      <button type="button" class="sfe-btn" id="sfeTraceReset">Reset</button>
+    </div>
+    <div class="sfe-trace-body">
+      <aside class="sfe-trace-timeline" id="sfeTraceTimeline"></aside>
+      <div class="sfe-trace-main">
+        <div id="sfeTraceStep"></div>
+        <div id="sfeTraceResult" hidden></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="data/demo-catalog.js"></script>
 <script src="data/nhap-kho-form-actions.js"></script>
 <script src="data/nhap-kho-nghiep-vu.js"></script>
+<script src="data/save-draft-trace.js"></script>
+<script src="js/form-demo.js"></script>
+<script src="js/trace-flow.js"></script>
 <script src="js/page-explorer.js"></script>
 </body>
 </html>

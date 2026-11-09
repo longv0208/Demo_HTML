@@ -1,29 +1,33 @@
-# Demo_HTML — Servlet Flow Explorer (Nhập kho)
+# PharmaFlow Learning Lab (Demo_HTML)
 
-Folder demo độc lập. **Code thật** vẫn nằm ở `../Pharma_Flow`; đây chỉ là HTML/JS học tập.
+Website học Java Servlet/JSP MVC2 — luồng **Nhập kho / Lưu nháp**, đối chiếu source `../Pharma_Flow`.
 
 ## Chạy
 
-Mở `index.html` hoặc `nhap-kho-form.html` bằng trình duyệt (không cần server).
+Mở `index.html` trong trình duyệt (không cần Tomcat/MySQL).
 
-## Cấu trúc
+## Kiểm tra nhanh
 
-| Đường dẫn | Nội dung |
+1. Trang chủ hiểu được mục đích + CTA **Bắt đầu bài học**.
+2. Form: cột **SL** đủ rộng; đổi PO cập nhật NCC/sản phẩm (có confirm).
+3. Thêm/xóa dòng; kiểm tra TU_CHOI hiện lý do; Zone→Rack→Bin; summary.
+4. Tab **Actions / Nghiệp vụ** không chồng panel.
+5. **Lưu nháp** hoặc **Bắt đầu mô phỏng** mở Trace (Prev/Next/Play/Pause/Reset).
+6. Nhánh Success / Validation / DB Error + Database [DEMO] trước/sau.
+
+## File chính
+
+| File | Vai trò |
 |---|---|
-| `nhap-kho-form.html` | Page Explorer — form tạo phiếu nhập |
-| `data/nhap-kho-form-actions.js` | Map action từ Servlet/JSP |
-| `data/nhap-kho-nghiep-vu.js` | Tóm tắt nghiệp vụ từ đặc tả |
-| `docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md` | Đặc tả nghiệp vụ đầy đủ |
-| `css/main.css` | Copy CSS app từ Pharma_Flow |
-| `css/explorer.css` | Chrome 3-pane explorer |
+| `nhap-kho-form.html` | Page Explorer + Trace modal |
+| `js/page-explorer.js` | Inspector, tabs, hotspot |
+| `js/form-demo.js` | Thao tác form demo |
+| `js/trace-flow.js` | Mô phỏng từng bước |
+| `data/save-draft-trace.js` | 17 bước + nhánh lỗi |
+| `data/demo-catalog.js` | 2 PO demo |
+| `docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md` | Đặc tả nghiệp vụ |
 
-## Tab Nghiệp vụ
+## Chưa làm (đúng scope)
 
-- Mục tiêu, khái niệm, giai đoạn A→F, quy tắc Lưu nháp, trạng thái GR
-- Mỗi Action (hotspot) có khối **Nghiệp vụ** + **Tác động kho** trong Inspector
-
-## Nguồn đối chiếu code
-
-- `../Pharma_Flow/src/java/controller/GoodsReceiptServlet.java`
-- `../Pharma_Flow/web/WEB-INF/views/admin/goods-receipt-form.jsp`
-- `../Pharma_Flow/src/java/dao/GoodsReceiptDAO.java`
+- Trace **Xác nhận nhập** đầy đủ
+- POS / Online / Stocktake / Adjustment

@@ -85,6 +85,10 @@
 
   function shortRoute(action) {
     if (action.formAction) return action.method + " " + action.formAction;
+    if (action.method === "GET" && action.reloadUrl) {
+      return "GET " + action.reloadUrl;
+    }
+    if (action.method) return action.method;
     if (action.clientBehavior) return "Client-side";
     return "—";
   }
@@ -409,14 +413,21 @@
       "</tbody></table></div>";
   }
 
+  function setPaneVisible(el, visible) {
+    if (!el) return;
+    el.classList.toggle("is-hidden", !visible);
+    if (visible) el.removeAttribute("hidden");
+    else el.setAttribute("hidden", "");
+  }
+
   function setLeftMode(mode) {
     var isActions = mode === "actions";
     if (els.tabActions) els.tabActions.classList.toggle("active", isActions);
     if (els.tabBiz) els.tabBiz.classList.toggle("active", !isActions);
-    if (els.leftActions) els.leftActions.hidden = !isActions;
-    if (els.leftBiz) els.leftBiz.hidden = isActions;
-    if (els.inspector) els.inspector.hidden = !isActions;
-    if (els.bizPanel) els.bizPanel.hidden = isActions;
+    setPaneVisible(els.leftActions, isActions);
+    setPaneVisible(els.leftBiz, !isActions);
+    setPaneVisible(els.inspector, isActions);
+    setPaneVisible(els.bizPanel, !isActions);
     if (els.rightHead) {
       els.rightHead.textContent = isActions
         ? "Action Inspector"
@@ -519,10 +530,38 @@
 
   function wireHotspots() {
     document.querySelectorAll(".sfe-hotspot").forEach(function (hotspot) {
+      // Click badge / empty padding → chọn action. Không chặn input/select/textarea.
       hotspot.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        selectAction(hotspot.dataset.actionId, false);
+        var t = ev.target;
+        if (!t) return;
+        if (
+          t.closest("input, select, textarea, label, option") ||
+          t.matches("input, select, textarea, label")
+        ) {
+          selectAction(hotspot.dataset.actionId, false);
+          return;
+        }
+        // Nút submit: để form submit handler mở Trace — chỉ highlight action
+        if (t.closest('button[type="submit"]') || t.matches('button[type="submit"]')) {
+          selectAction(hotspot.dataset.actionId, false);
+          return;
+        }
+        // Link Hủy / button thường: chặn điều hướng ngoài, chọn action
+        if (t.closest("a") || t.matches("a")) {
+          ev.preventDefault();
+          selectAction(hotspot.dataset.actionId, false);
+          return;
+        }
+        if (t.closest('button[type="button"]') || t.matches('button[type="button"]')) {
+          // add-item: form-demo sẽ xử lý click nút; chỉ sync inspector
+          selectAction(hotspot.dataset.actionId, false);
+          return;
+        }
+        // Click vào vùng hotspot (badge)
+        if (t.classList.contains("sfe-hotspot-mark") || t === hotspot) {
+          ev.preventDefault();
+          selectAction(hotspot.dataset.actionId, false);
+        }
       });
     });
   }
@@ -533,34 +572,40 @@
     els.form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       selectAction("save-draft", false);
-      alert(
-        "Chế độ học tập: form không gửi tới server thật.\n" +
-          "Xem Action Inspector bên phải — Trace Flow đầy đủ sẽ làm ở bước sau."
-      );
+      setLeftMode("actions");
+      if (window.SFE_Trace) SFE_Trace.open();
     });
-
-    var poSelect = document.getElementById("purchaseOrderId");
-    if (poSelect) {
-      poSelect.addEventListener("change", function () {
-        selectAction("po-change", false);
-        refreshHttpPreview();
-      });
-    }
-
-    var addBtn = document.getElementById("addItemBtn");
-    if (addBtn) {
-      addBtn.addEventListener("click", function () {
-        selectAction("add-item", false);
-        var tbody = document.getElementById("itemsBody");
-        var tpl = document.getElementById("grRowTemplate");
-        if (tbody && tpl) tbody.appendChild(tpl.content.cloneNode(true));
-      });
-    }
 
     PO_SYNC_FIELDS.forEach(function (fieldId) {
       var field = document.getElementById(fieldId);
       if (field) field.addEventListener("input", refreshHttpPreview);
     });
+  }
+
+  function wireOnboarding() {
+    var tip = document.getElementById("sfeOnboard");
+    if (!tip) return;
+    var key = "sfe_onboard_v1";
+    var dismissed = false;
+    try {
+      dismissed = localStorage.getItem(key) === "1";
+    } catch (e) {}
+    if (!dismissed) tip.hidden = false;
+
+    var skip = document.getElementById("sfeOnboardSkip");
+    var again = document.getElementById("sfeShowGuide");
+    function hide() {
+      tip.hidden = true;
+      try {
+        localStorage.setItem(key, "1");
+      } catch (e2) {}
+    }
+    if (skip) skip.addEventListener("click", hide);
+    if (again) {
+      again.addEventListener("click", function () {
+        tip.hidden = false;
+      });
+    }
   }
 
   function wireChrome() {
@@ -581,22 +626,14 @@
         openRightOnNarrow();
       });
     }
-
-    if (els.traceBtn) {
-      els.traceBtn.addEventListener("click", function () {
-        if (!activeId) return;
-        var action = data.actions[activeId];
-        if (!action || !action.traceReady) return;
-        alert(
-          "Trace Flow cho «" +
-            action.element +
-            "» sẽ là màn tiếp theo (12 bước Servlet Simulator).\n\n" +
-            "Luồng đã xác minh từ source:\n" +
-            "POST ?action=create → doPost → handleCreate → validateReceipt → createDraft → sendRedirect ?ok=created"
-        );
-      });
-    }
   }
+
+  // Public API cho form-demo / trace-flow
+  window.SFE = {
+    selectAction: selectAction,
+    refreshHttpPreview: refreshHttpPreview,
+    setLeftMode: setLeftMode
+  };
 
   buildActionList();
   buildBizTopicList();
@@ -612,6 +649,12 @@
   wireHotspots();
   wireFormDemo();
   wireChrome();
+  wireOnboarding();
   setLeftMode("actions");
-  renderInspector(null);
+
+  if (window.SFE_FormDemo) SFE_FormDemo.init(window.SFE_DEMO);
+  if (window.SFE_Trace) SFE_Trace.wire();
+
+  // Mặc định chọn Lưu nháp
+  selectAction("save-draft", false);
 })();

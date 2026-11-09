@@ -3,31 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Demo_HTML — PharmaFlow Servlet Flow Explorer</title>
+  <title>PharmaFlow Learning Lab</title>
   <link rel="stylesheet" href="css/explorer.css">
 </head>
-<body>
-  <div class="sfe-landing">
-    <h1>PharmaFlow · Demo HTML</h1>
+<body class="sfe-landing-page">
+  <div class="sfe-landing sfe-landing--lab">
+    <p class="sfe-kicker">PharmaFlow · Java Web MVC2</p>
+    <h1>PharmaFlow Learning Lab</h1>
+    <p class="sfe-tagline">Nhấn một nút. Hiểu toàn bộ luồng Java Web phía sau.</p>
     <p>
-      Website học luồng Servlet/JSP cho <strong>Nhập kho</strong>.
-      Phân tích kỹ thuật lấy từ source <code>../Pharma_Flow</code>;
-      giải thích nghiệp vụ theo đặc tả trong <code>docs/</code>.
+      Khám phá cách một thao tác <strong>nhập kho</strong> đi qua HTTP Request, Servlet, DAO, Database
+      và trở về JSP — dựa trên source code thực tế của
+      <a class="sfe-doc-link" href="https://github.com/longv0208/Pharma_Flow" target="_blank" rel="noopener">Pharma_Flow</a>.
     </p>
+
+    <a class="sfe-cta" href="nhap-kho-form.html">Bắt đầu bài học: Lưu nháp phiếu nhập</a>
+
+    <div class="sfe-landing-grid">
+      <section>
+        <h2>Bạn sẽ học được gì?</h2>
+        <ul>
+          <li>Form JSP gửi GET/POST thế nào</li>
+          <li>Servlet mapping <code>/inventory/receipts</code></li>
+          <li><code>doPost</code> → <code>handleCreate</code> → validation</li>
+          <li>DAO <code>createDraft</code> + SQL INSERT nháp</li>
+          <li>Vì sao Lưu nháp <em>không</em> cộng tồn kho</li>
+          <li>Khác biệt <code>forward</code> và <code>sendRedirect</code> (PRG)</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Cách dùng trong 3 bước</h2>
+        <ol>
+          <li>Mở form demo — chỉnh PO / dòng hàng (dữ liệu [DEMO])</li>
+          <li>Click badge vàng hoặc chọn Action bên trái</li>
+          <li>Nhấn <strong>Lưu nháp</strong> / <strong>Bắt đầu mô phỏng</strong> để Trace từng bước</li>
+        </ol>
+      </section>
+    </div>
+
     <p class="sfe-landing-note">
-      Không cần Tomcat/MySQL — mở file HTML trực tiếp. Dữ liệu trên form là [DEMO].
-    </p>
-
-    <a class="card" href="nhap-kho-form.html">
-      <strong>1. Page Explorer — Form Nhập kho (create)</strong>
-      Giao diện mô phỏng JSP + hotspot Actions + panel Nghiệp vụ (Lưu nháp / chọn PO…).
-    </a>
-
-    <p class="sfe-landing-foot">
-      Tài liệu nghiệp vụ đầy đủ:
-      <a class="sfe-doc-link" href="docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md">
-        PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md
-      </a>
+      Không cần Tomcat hay MySQL. Mọi số liệu là <strong>[DEMO]</strong> — không ghi database thật.
+      Đặc tả nghiệp vụ:
+      <a class="sfe-doc-link" href="docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md">docs/PharmaFlow_Dac_Ta_Nghiep_Vu_Nhap_Kho.md</a>
     </p>
   </div>
 </body>
