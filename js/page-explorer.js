@@ -413,6 +413,59 @@
       "</tbody></table></div>";
   }
 
+  function renderBizTopic(topicId) {
+    if (!els.bizPanel || !biz) return;
+    if (!topicId || topicId === "all") {
+      renderBizOverview();
+      if (els.rightHead) els.rightHead.textContent = "Giải thích nghiệp vụ";
+      els.bizPanel.scrollTop = 0;
+      openRightOnNarrow();
+      return;
+    }
+
+    var topic = (biz.topics || []).find(function (t) {
+      return t.id === topicId;
+    });
+    if (!topic) {
+      renderBizOverview();
+      return;
+    }
+
+    if (els.rightHead) els.rightHead.textContent = topic.title;
+
+    els.bizPanel.innerHTML =
+      '<p class="sfe-insp-title">' +
+      escapeHtml(topic.title) +
+      "</p>" +
+      '<p class="sfe-insp-sub">' +
+      escapeHtml(topic.summary || "") +
+      "</p>" +
+      '<p class="sfe-prose sfe-oneliner">' +
+      escapeHtml(topic.body || "") +
+      "</p>" +
+      '<div class="sfe-section"><h4>Điểm cần nhớ</h4>' +
+      ulList(topic.points) +
+      "</div>" +
+      '<div class="sfe-section"><h4>Gợi ý trên form demo</h4>' +
+      '<p class="sfe-prose">' +
+      (topicId === "po"
+        ? "Thử đổi <strong>Đơn đặt hàng</strong> (badge 1) — Supplier và danh sách sản phẩm đổi theo."
+        : topicId === "inspection"
+          ? "Đổi cột <strong>Kiểm tra</strong> sang Từ chối để thấy ô lý do; chọn Chấp nhận để bắt buộc Bin."
+          : topicId === "draft-vs-confirm"
+            ? "Nút <strong>Lưu nháp</strong> (badge 4) chỉ tạo BAN_NHAP — mở Trace để xem DB demo không cộng tồn."
+            : topicId === "location"
+              ? "Chọn Khu → Kệ → Ngăn trên dòng sản phẩm (dữ liệu DEMO có quan hệ hợp lệ)."
+              : "Xem lại form giữa màn hình và so với checklist bên trái.") +
+      "</p></div>" +
+      '<p class="sfe-muted-inline">Nguồn: ' +
+      escapeHtml(biz.sourceDoc || "đặc tả nghiệp vụ") +
+      "</p>";
+
+    els.bizPanel.scrollTop = 0;
+    openRightOnNarrow();
+  }
+
   function setPaneVisible(el, visible) {
     if (!el) return;
     el.classList.toggle("is-hidden", !visible);
@@ -513,7 +566,7 @@
       });
       btn.classList.add("active");
       setLeftMode("biz");
-      if (els.bizPanel) els.bizPanel.scrollTop = 0;
+      renderBizTopic(id);
     });
     host.appendChild(btn);
   }
@@ -623,7 +676,8 @@
     if (els.tabBiz) {
       els.tabBiz.addEventListener("click", function () {
         setLeftMode("biz");
-        openRightOnNarrow();
+        var activeTopic = document.querySelector("#sfeBizTopicList .sfe-topic.active");
+        renderBizTopic(activeTopic ? activeTopic.dataset.topic : "all");
       });
     }
   }

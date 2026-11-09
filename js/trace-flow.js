@@ -10,9 +10,6 @@
     branch: "success",
     validationId: "no-po",
     index: 0,
-    playing: false,
-    speedMs: 1400,
-    timer: null,
     steps: []
   };
 
@@ -261,7 +258,6 @@
         .join("");
       timeline.querySelectorAll(".sfe-tl-item").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          pause();
           state.index = parseInt(btn.dataset.i, 10);
           renderStep();
         });
@@ -293,34 +289,6 @@
     }
   }
 
-  function pause() {
-    state.playing = false;
-    if (state.timer) {
-      clearInterval(state.timer);
-      state.timer = null;
-    }
-    var playBtn = $("sfeTracePlay");
-    if (playBtn) playBtn.textContent = "Play";
-  }
-
-  function play() {
-    if (state.playing) {
-      pause();
-      return;
-    }
-    state.playing = true;
-    var playBtn = $("sfeTracePlay");
-    if (playBtn) playBtn.textContent = "Pause";
-    state.timer = setInterval(function () {
-      if (state.index >= state.steps.length - 1) {
-        pause();
-        return;
-      }
-      state.index++;
-      renderStep();
-    }, state.speedMs);
-  }
-
   function rebuildSteps() {
     state.steps = filterSteps(state.branch);
     state.index = 0;
@@ -341,7 +309,6 @@
   }
 
   function close() {
-    pause();
     state.open = false;
     var modal = $("sfeTraceModal");
     if (modal) modal.hidden = true;
@@ -367,39 +334,23 @@
 
     $("sfeTracePrev") &&
       $("sfeTracePrev").addEventListener("click", function () {
-        pause();
         if (state.index > 0) state.index--;
         renderStep();
       });
     $("sfeTraceNext") &&
       $("sfeTraceNext").addEventListener("click", function () {
-        pause();
         if (state.index < state.steps.length - 1) state.index++;
         renderStep();
       });
-    $("sfeTracePlay") && $("sfeTracePlay").addEventListener("click", play);
     $("sfeTraceReset") &&
       $("sfeTraceReset").addEventListener("click", function () {
-        pause();
         state.snap = collectFormSnapshot();
         state.index = 0;
         renderStep();
       });
 
-    var speed = $("sfeTraceSpeed");
-    if (speed) {
-      speed.addEventListener("change", function () {
-        state.speedMs = parseInt(speed.value, 10) || 1400;
-        if (state.playing) {
-          pause();
-          play();
-        }
-      });
-    }
-
     document.querySelectorAll('input[name="sfeTraceBranch"]').forEach(function (radio) {
       radio.addEventListener("change", function () {
-        pause();
         state.branch = radio.value;
         var valWrap = $("sfeTraceValWrap");
         if (valWrap) valWrap.hidden = state.branch !== "validation";

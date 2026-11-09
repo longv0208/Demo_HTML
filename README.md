@@ -12,7 +12,8 @@ Mở `index.html` trong trình duyệt (không cần Tomcat/MySQL).
 2. Form: cột **SL** đủ rộng; đổi PO cập nhật NCC/sản phẩm (có confirm).
 3. Thêm/xóa dòng; kiểm tra TU_CHOI hiện lý do; Zone→Rack→Bin; summary.
 4. Tab **Actions / Nghiệp vụ** không chồng panel.
-5. **Lưu nháp** hoặc **Bắt đầu mô phỏng** mở Trace (Prev/Next/Play/Pause/Reset).
+5. **Lưu nháp** hoặc **Bắt đầu mô phỏng** mở Trace — bấm **Next** / **Previous** (không tự chạy).
+6. Tab **Nghiệp vụ**: chọn chủ đề → panel phải đổi nội dung giải thích.
 6. Nhánh Success / Validation / DB Error + Database [DEMO] trước/sau.
 
 ## File chính
